@@ -395,6 +395,61 @@
       $$("[data-duim]").forEach((x) => x.setAttribute("aria-pressed", x === d));
       $$("[data-dia]").forEach((x) => { x.hidden = x.dataset.dia !== d.dataset.duim; });
     }));
+    // Inzoomen op de poster zelf: met de muis eroverheen bewegen vergroot hem precies waar je kijkt
+    const posterVlak = $(".galerij__poster", product), posterBeeld = posterVlak && $("img", posterVlak);
+    if (posterVlak) {
+      posterVlak.insertAdjacentHTML("beforeend", '<span class="zoomhint" aria-hidden="true">Beweeg om in te zoomen · klik voor volledig scherm</span>');
+      posterVlak.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse") return;
+        const r = posterVlak.getBoundingClientRect();
+        const x = Math.min(100, Math.max(0, (e.clientX - r.left - posterBeeld.offsetLeft) / posterBeeld.offsetWidth * 100));
+        const y = Math.min(100, Math.max(0, (e.clientY - r.top - posterBeeld.offsetTop) / posterBeeld.offsetHeight * 100));
+        if (!posterVlak.classList.contains("zoomt")) posterBeeld.src = posterBeeld.src.replace("-480.webp", "-960.webp");
+        posterBeeld.style.transformOrigin = `${x}% ${y}%`;
+        posterBeeld.style.transform = "scale(2.5)";
+        posterVlak.classList.add("zoomt");
+      });
+      posterVlak.addEventListener("pointerleave", () => { posterBeeld.style.transform = ""; posterVlak.classList.remove("zoomt"); });
+    }
+
+    // Volledig scherm: scrollen of knijpen om te zoomen, slepen om te bewegen, dubbelklik om te wisselen
+    const bak = $("[data-lichtbak]");
+    if (bak) {
+      const doek = $("[data-lichtbak-doek]", bak), lb = $("[data-lichtbak-beeld]", bak);
+      let z = 1, tx = 0, ty = 0, vorige = null;
+      const vingers = new Map();
+      const zet = () => { lb.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${z})`; };
+      const zoom = (factor, cx = innerWidth / 2, cy = innerHeight / 2) => {
+        const nz = Math.min(6, Math.max(1, z * factor)), k = nz / z, ox = cx - innerWidth / 2, oy = cy - innerHeight / 2;
+        tx = (tx - ox) * k + ox; ty = (ty - oy) * k + oy; z = nz;
+        if (z === 1) { tx = 0; ty = 0; }
+        zet();
+      };
+      const open = (src) => { lb.src = src; z = 1; tx = 0; ty = 0; zet(); bak.hidden = false; document.body.style.overflow = "hidden"; $("[data-lichtbak-sluit]", bak).focus(); };
+      const sluit = () => { bak.hidden = true; document.body.style.overflow = ""; };
+      posterVlak?.addEventListener("click", () => open(posterBeeld.src.replace("-480.webp", "-960.webp")));
+      $$(".galerij__dia > img", product).forEach((im) => im.addEventListener("click", () => open(im.currentSrc.replace("-640.webp", "-1264.webp"))));
+      product.addEventListener("click", (e) => { if (e.target.closest(".galerij__doek")) open(e.target.closest(".galerij__doek").toDataURL("image/jpeg", 0.92)); });
+      doek.addEventListener("wheel", (e) => { e.preventDefault(); zoom(e.deltaY < 0 ? 1.2 : 1 / 1.2, e.clientX, e.clientY); }, { passive: false });
+      doek.addEventListener("dblclick", (e) => zoom(z > 1 ? 1 / z : 2.5, e.clientX, e.clientY));
+      doek.addEventListener("pointerdown", (e) => { vingers.set(e.pointerId, { x: e.clientX, y: e.clientY }); doek.setPointerCapture(e.pointerId); doek.classList.add("sleept"); vorige = null; });
+      doek.addEventListener("pointermove", (e) => {
+        if (!vingers.has(e.pointerId)) return;
+        const oud = vingers.get(e.pointerId);
+        vingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (vingers.size === 2) { // knijpen
+          const [a, b] = [...vingers.values()], afstand = Math.hypot(a.x - b.x, a.y - b.y);
+          if (vorige) zoom(afstand / vorige, (a.x + b.x) / 2, (a.y + b.y) / 2);
+          vorige = afstand;
+        } else if (z > 1) { tx += e.clientX - oud.x; ty += e.clientY - oud.y; zet(); }
+      });
+      const los = (e) => { vingers.delete(e.pointerId); vorige = null; if (!vingers.size) doek.classList.remove("sleept"); };
+      doek.addEventListener("pointerup", los);
+      doek.addEventListener("pointercancel", los);
+      $$("[data-zoom]", bak).forEach((k) => k.addEventListener("click", () => zoom(k.dataset.zoom > 0 ? 1.5 : 1 / 1.5)));
+      $("[data-lichtbak-sluit]", bak).addEventListener("click", sluit);
+      document.addEventListener("keydown", (e) => { if (!bak.hidden && e.key === "Escape") sluit(); });
+    }
     $("[data-vergelijker-open]").addEventListener("click", (ev) => {
       vergelijker.hidden = !vergelijker.hidden;
       ev.currentTarget.setAttribute("aria-expanded", !vergelijker.hidden);

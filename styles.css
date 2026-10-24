@@ -305,7 +305,8 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .galerij__dia > img { width: 100%; height: 100%; object-fit: cover; }
 .galerij__dia figcaption { position: absolute; left: 14px; bottom: 14px; background: rgba(255, 253, 249, .92); border-radius: 8px; padding: 5px 11px; font-size: .8rem; font-weight: 600; }
 .galerij__poster { height: 100%; display: grid; place-items: center; background: var(--tint); padding: 6%; }
-.galerij__poster img { height: 100%; width: auto; box-shadow: 0 16px 30px -12px rgba(30, 27, 46, .5); }
+.galerij__poster { position: relative; overflow: hidden; cursor: zoom-in; }
+.galerij__poster img { position: absolute; inset: 0; margin: auto; width: auto; height: auto; max-width: 86%; max-height: 86%; box-shadow: 0 16px 30px -12px rgba(30, 27, 46, .5); transition: transform .25s ease-out; will-change: transform; }
 .galerij__muurknop { position: absolute; right: 14px; bottom: 14px; display: inline-flex; gap: 8px; align-items: center; border: 0; border-radius: 999px; padding: 9px 15px; background: var(--inkt); color: var(--papier); font-weight: 700; font-size: .85rem; }
 .galerij__muurknop svg, .vergelijker__titel svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .galerij__duimen { display: flex; gap: 10px; margin-top: 12px; }
@@ -873,3 +874,17 @@ html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
   .nieuwsbrief__pim { width: 80px; }
   .doorkijk__boog { border-width: 8px; }
 }
+
+/* ---------- Productfoto's: inzoomen bij aanwijzen en volledig scherm ---------- */
+.galerij__poster.zoomt img { transition: transform .08s linear; }
+.galerij__dia > img, .galerij__doek { cursor: zoom-in; }
+.zoomhint { position: absolute; right: 14px; top: 14px; z-index: 2; background: rgba(14, 59, 47, .82); color: #fff; font-size: .75rem; font-weight: 700; padding: 5px 11px; border-radius: 999px; pointer-events: none; transition: opacity .2s; }
+.galerij__poster.zoomt .zoomhint { opacity: 0; }
+.lichtbak { position: fixed; inset: 0; z-index: 80; background: rgba(10, 20, 16, .94); display: grid; }
+.lichtbak__doek { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; }
+.lichtbak__doek.sleept { cursor: grabbing; }
+.lichtbak__doek img { position: absolute; left: 50%; top: 50%; max-width: 92vw; max-height: 88vh; transform-origin: center; user-select: none; -webkit-user-drag: none; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .7); }
+.lichtbak__knoppen { position: absolute; right: 18px; top: 18px; display: flex; gap: 8px; }
+.lichtbak__knoppen button { width: 46px; height: 46px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .92); color: var(--inkt); font: 700 1.4rem/1 var(--tekst); display: grid; place-items: center; }
+.lichtbak__knoppen svg { width: 20px; height: 20px; fill: none; stroke: var(--inkt); stroke-width: 2.4; }
+.lichtbak__hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); margin: 0; color: rgba(255, 255, 255, .8); font-size: .85rem; background: rgba(0, 0, 0, .35); padding: 6px 14px; border-radius: 999px; white-space: nowrap; }
