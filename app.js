@@ -176,6 +176,11 @@
     knop.addEventListener("mouseleave", () => clearTimeout(openTimer));
     uitklap.addEventListener("mouseleave", () => { clearTimeout(openTimer); dichtTimer = setTimeout(dicht, 220); });
     mega.addEventListener("mouseenter", () => clearTimeout(dichtTimer));
+    // Bij een klik meteen dicht (anders blijft het staan tot de volgende pagina er is),
+    // en altijd dicht als een pagina uit het geheugen van de browser terugkomt (terugbladeren).
+    uitklap.addEventListener("click", () => { dicht(); document.activeElement?.blur?.(); });
+    addEventListener("pageshow", dicht);
+    addEventListener("pagehide", dicht);
     addEventListener("scroll", () => { if (uitklap.classList.contains("open")) { dicht(); document.activeElement?.closest?.("[data-mega]") && document.activeElement.blur(); } }, { passive: true });
     const kies = (stijl) => {
       $$("[data-mega-stijl]", mega).forEach((a) => a.classList.toggle("actief", a.dataset.megaStijl === stijl));
@@ -213,11 +218,18 @@
       });
       aantal.textContent = `${n} ${n === 1 ? "poster" : "posters"}`;
       $("[data-leeg]").hidden = n > 0;
+      tegels();
+    };
+    // Tussentegels alleen in het standaardoverzicht, niet als je filtert, zoekt of sorteert
+    const tegels = () => {
+      const standaard = !zoek.value.trim() && sorteer.value === "pop" && Object.values(actief).every((s) => !s.size);
+      $$("[data-promo]", raster).forEach((t) => { t.hidden = !standaard; });
     };
     const sorteerNu = () => {
       const v = sorteer.value;
       const lijst = [...kaarten].sort((a, b) => v === "pop" ? a.dataset.pop - b.dataset.pop : v === "az" ? a.dataset.naam.localeCompare(b.dataset.naam) : b.dataset.naam.localeCompare(a.dataset.naam));
       lijst.forEach((k) => raster.appendChild(k));
+      tegels();
     };
     $$("[data-filter]").forEach((chip) => chip.addEventListener("click", () => {
       const veld = chip.dataset.filter, w = chip.dataset.waarde;
