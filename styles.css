@@ -686,3 +686,18 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 
 .held__video { display: block; aspect-ratio: 3 / 2; object-fit: cover; background: var(--papier-2); }
 @media (prefers-reduced-motion: reduce) { .held__video { animation: none; } }
+
+/* ---------- Categoriekop met eigen sfeer: vervaagde kamerscène in duotone ---------- */
+.lijstkop--scene { position: relative; isolation: isolate; overflow: hidden; background: var(--inkt); color: var(--papier); padding: 10px 0 clamp(44px, 6vw, 72px); }
+.lijstkop__scene { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; z-index: -2; filter: grayscale(1) contrast(1.2) brightness(1.15) blur(5px); opacity: .85; mix-blend-mode: luminosity; }
+.lijstkop--scene::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(100deg, color-mix(in srgb, var(--inkt) 94%, transparent) 22%, color-mix(in srgb, var(--inkt) 72%, transparent) 55%, color-mix(in srgb, var(--inkt) 50%, transparent)); }
+.lijstkop--scene::after { content: ""; position: absolute; width: 380px; height: 380px; right: -110px; bottom: -190px; border-radius: 50%; background: var(--tomaat); opacity: .85; z-index: -1; }
+.lijstkop--scene .kruimel, .lijstkop--scene .kruimel a { color: color-mix(in srgb, var(--papier) 75%, transparent); }
+.lijstkop--scene h1 { color: var(--papier); font-size: clamp(2.8rem, 6.4vw, 5.4rem); margin: .1em 0 .3em; }
+.lijstkop--scene .lead { color: color-mix(in srgb, var(--papier) 82%, transparent); max-width: 54ch; }
+.lijstkop__aantal { display: inline-block; margin: 18px 0 0; background: var(--blush); color: var(--inkt); font-weight: 800; font-size: .85rem; padding: 4px 14px; border-radius: 999px; transform: rotate(-2deg); }
+.lijstkop--scene .lijstkop__beeld { position: relative; }
+.lijstkop--scene .lijstkop__beeld::before { content: ""; position: absolute; inset: -7% -6% -9% 8%; background: var(--blush); border-radius: 58% 42% 50% 50% / 45% 55% 45% 55%; transform: rotate(-8deg); z-index: -1; }
+.lijstkop--scene .lijstkop__beeld img { border: 7px solid var(--papier); transform: rotate(1.6deg); }
+.lijstkop--scene .lijstkop__in { position: relative; }
+@media (max-width: 900px) { .lijstkop--scene .lijstkop__beeld { max-width: 520px; } .lijstkop--scene::after { width: 220px; height: 220px; right: -90px; bottom: -120px; } }
