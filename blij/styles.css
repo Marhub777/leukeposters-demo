@@ -86,7 +86,7 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .actiebalk span { display: inline-flex; align-items: center; gap: 8px; }
 .actiebalk svg { width: 16px; height: 16px; fill: none; stroke: var(--zon); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .actiebalk b { color: var(--zon); }
-.kop { position: sticky; top: 0; z-index: 40; background: rgba(246, 241, 232, .92); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--lijn); }
+.kop { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--papier) 92%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--lijn); }
 .kop__in { display: flex; align-items: center; gap: 28px; height: 74px; }
 .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--inkt); flex-shrink: 0; }
 .logo .merk { width: 34px; height: 40px; transition: transform .3s cubic-bezier(.3, 1.6, .5, 1); }

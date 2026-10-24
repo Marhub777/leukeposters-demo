@@ -275,6 +275,8 @@
       const u = new URL(location.href); u.searchParams.set("maat", m);
       try { history.replaceState(null, "", u); } catch { /* offline demo: adresbalk blijft gelijk */ }
       tekenVergelijker(m);
+      const planLink = $(".koop__planner");
+      if (planLink) planLink.href = pad("/muurplanner/") + `?p=${product.dataset.product}&l=een&m=${sleutel(m)}`;
     };
     function tekenVergelijker(m) {
       const [b, h] = m.split("x").map(Number), schaal = 0.8;
@@ -376,15 +378,18 @@
   const kiezer = $("[data-kiezer]");
   function sluitKiezer() { if (kiezer && !kiezer.hidden) { kiezer.hidden = true; document.body.style.overflow = ""; } }
   if (planner) {
-    // Per vak in cm: x = midden t.o.v. het ankerpunt, y = onderkant boven het ankerpunt (de plek boven bank, bed of tafel).
+    // Een indeling bestaat uit kolommen; elke kolom is een stapel vakken (van onder naar boven).
+    // Kolommen staan naast elkaar en zijn verticaal gecentreerd. Alles wordt berekend op de échte formaten,
+    // dus een groter formaat schuift de rest netjes op en hangt nooit over het meubel heen.
     const INDELINGEN = {
-      een: { naam: "Eén poster", vakken: [{ m: "70x100", x: 0, y: 0 }] },
-      groot: { naam: "Eén grote", vakken: [{ m: "100x140", x: 0, y: -6 }] },
-      duo: { naam: "Duo", vakken: [{ m: "50x70", x: -30, y: 6 }, { m: "50x70", x: 30, y: 6 }] },
-      trio: { naam: "Trio", vakken: [{ m: "50x70", x: -60, y: 6 }, { m: "50x70", x: 0, y: 6 }, { m: "50x70", x: 60, y: 6 }] },
-      mix: { naam: "Groot en klein", vakken: [{ m: "70x100", x: -25, y: 0 }, { m: "30x40", x: 33, y: 0 }, { m: "30x40", x: 33, y: 48 }] },
-      wand: { naam: "Fotowand", vakken: [{ m: "50x70", x: 0, y: 8 }, { m: "30x40", x: -48, y: 0 }, { m: "30x40", x: -48, y: 46 }, { m: "30x40", x: 48, y: 0 }, { m: "30x40", x: 48, y: 46 }] },
+      een: { naam: "Eén poster", maten: ["70x100"], kolommen: [[0]] },
+      groot: { naam: "Eén grote", maten: ["100x140"], kolommen: [[0]] },
+      duo: { naam: "Duo", maten: ["50x70", "50x70"], kolommen: [[0], [1]] },
+      trio: { naam: "Trio", maten: ["50x70", "50x70", "50x70"], kolommen: [[0], [1], [2]] },
+      mix: { naam: "Groot en klein", maten: ["70x100", "30x40", "30x40"], kolommen: [[0], [1, 2]] },
+      wand: { naam: "Fotowand", maten: ["50x70", "30x40", "30x40", "30x40", "30x40"], kolommen: [[1, 2], [0], [3, 4]] },
     };
+    const TUSSEN = 8; // cm tussen de lijsten
     const LIJSTEN = { auto: ["Automatisch", null], zwart: ["Zwart", "#18161d"], eiken: ["Eiken", "#b88a5a"], wit: ["Wit", "#f4f1ea"] };
     const LIJST_CM = 2.2;
     const params = new URLSearchParams(location.search);
@@ -393,16 +398,16 @@
       eigen: null,
       indeling: INDELINGEN[params.get("l")] ? params.get("l") : ((params.get("p") || "").includes(",") ? "trio" : "een"),
       posters: (params.get("p") || "").split(",").filter(Boolean),
-      maten: [],
+      maten: (params.get("m") || "").split(",").map((m) => (FORMATEN[sleutel(m)] ? sleutel(m) : undefined)),
       lijst: LIJSTEN[params.get("f")] ? params.get("f") : "auto",
       pos: [],
     };
     const canvas = $("[data-canvas]"), ctx = canvas.getContext("2d");
     const beelden = {};
     const laad = (src) => (beelden[src] ??= new Promise((ok, fout) => { const im = new Image(); im.onload = () => ok(im); im.onerror = fout; im.src = src; }));
-    let c, per, achter, pxcm = 3, anker = { x: 0, y: 0 }, sleep = null, gepland = false;
+    let c, per, achter, pxcm = 3, anker = { x: 0, y: 0 }, plafond = 0, verschuif = 0, sleep = null, gepland = false;
 
-    const vakken = () => INDELINGEN[st.indeling].vakken;
+    const vakken = () => INDELINGEN[st.indeling].maten.map((m) => ({ m }));
     const maatVan = (i) => {
       const m = st.maten[i] || vakken()[i].m, p = per[st.posters[i]];
       const [b, h] = m.split("x").map(Number);
@@ -419,25 +424,41 @@
         achter = st.eigen.beeld;
         pxcm = achter.width / st.eigen.breedte;
         anker = { x: achter.width / 2, y: achter.height * 0.5 };
+        plafond = 0;
       } else {
         const k = c.kamers[st.kamer] || c.kamers.woonkamer;
         achter = await laad(`${IMG}kamers-leeg/${st.kamer}-1264.webp`);
         const f = achter.width / 1264;
         pxcm = k.pxcm * f;
         anker = { x: k.cx * f, y: k.onder * f };
+        plafond = (k.plafond || 0) * f;
       }
-      canvas.width = achter.width;
-      canvas.height = achter.height;
+    }
+    // Rechthoeken in cm t.o.v. het ankerpunt (x vanaf het midden, y omhoog vanaf de onderkant), lijst meegerekend
+    function schikking(ind, maatVanVak) {
+      const kol = ind.kolommen.map((stapel) => {
+        const vk = stapel.map((i) => { const [b, h] = maatVanVak(i); return { i, b: b + 2 * LIJST_CM, h: h + 2 * LIJST_CM }; });
+        return { vk, b: Math.max(...vk.map((v) => v.b)), h: vk.reduce((t, v) => t + v.h, 0) + TUSSEN * (vk.length - 1) };
+      });
+      const totaalB = kol.reduce((t, k) => t + k.b, 0) + TUSSEN * (kol.length - 1), maxH = Math.max(...kol.map((k) => k.h));
+      const uit = [];
+      let x = -totaalB / 2;
+      for (const k of kol) {
+        let y = (maxH - k.h) / 2;
+        for (const v of k.vk) { uit[v.i] = { x: x + (k.b - v.b) / 2, y, b: v.b, h: v.h }; y += v.h + TUSSEN; }
+        x += k.b + TUSSEN;
+      }
+      return uit;
     }
     function indeel() {
-      const d = LIJST_CM * pxcm;
-      st.pos = vakken().map((v, i) => {
-        const [b, h] = maatVan(i), W = b * pxcm + 2 * d, H = h * pxcm + 2 * d;
-        return { x: anker.x + v.x * pxcm - W / 2, y: anker.y - v.y * pxcm - H, w: W, h: H };
-      });
-      // Past de groep niet boven in de foto? Dan schuift hij omlaag.
-      const boven = Math.min(...st.pos.map((p) => p.y)), marge = canvas.height * 0.04;
-      if (boven < marge) st.pos.forEach((p) => { p.y += marge - boven; });
+      st.pos = schikking(INDELINGEN[st.indeling], maatVan).map((q) => ({ x: anker.x + q.x * pxcm, y: anker.y - (q.y + q.h) * pxcm, w: q.b * pxcm, h: q.h * pxcm }));
+      // Past de groep niet op de foto? Dan verlengen we de muur naar boven (zonder plafond of sierlijst),
+      // zodat de posters boven het meubel blijven hangen en helemaal in beeld zijn.
+      const boven = Math.min(...st.pos.map((q) => q.y)), marge = achter.height * 0.04;
+      verschuif = boven < marge ? Math.ceil(marge - boven) : 0;
+      st.pos.forEach((q) => { q.y += verschuif; });
+      canvas.width = achter.width;
+      canvas.height = achter.height + verschuif;
     }
     function omlijst(im, x, y, W, H, kleur) {
       const d = LIJST_CM * pxcm, w = W - 2 * d, h = H - 2 * d;
@@ -462,7 +483,16 @@
     }
     async function teken(voorDownload = false) {
       const ims = await Promise.all(vakken().map((_, i) => st.posters[i] ? laad(`${IMG}poster/${st.posters[i]}-960.webp`).catch(() => laad(`${IMG}poster/${st.posters[i]}-480.webp`)) : null));
-      ctx.drawImage(achter, 0, 0, canvas.width, canvas.height);
+      if (verschuif) {
+        const y0 = Math.round(plafond), strook = Math.max(4, Math.round(achter.height * 0.012)), boven = verschuif + y0;
+        ctx.drawImage(achter, 0, y0, achter.width, strook, 0, 0, canvas.width, boven + 1); // muur doortrekken
+        const g = ctx.createLinearGradient(0, 0, 0, boven);
+        g.addColorStop(0, "rgba(0,0,0,.08)"); g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, boven);
+        ctx.drawImage(achter, 0, y0, achter.width, achter.height - y0, 0, boven, achter.width, achter.height - y0);
+      } else {
+        ctx.drawImage(achter, 0, 0, canvas.width, achter.height);
+      }
       ims.forEach((im, i) => { if (im) { const p = st.pos[i]; omlijst(im, p.x, p.y, p.w, p.h, kleurVan(i)); } });
       if (!voorDownload && sleep) {
         const p = st.pos[sleep.i];
@@ -481,7 +511,9 @@
       $("[data-upload-label]").classList.toggle("actief", !!st.eigen);
       $("[data-kalibratie]").hidden = !st.eigen;
       $("[data-indelingen]").innerHTML = Object.entries(INDELINGEN).map(([k, v]) => {
-        const svg = `<svg viewBox="-80 -100 160 120" aria-hidden="true">${v.vakken.map((s) => { const [b, h] = s.m.split("x").map(Number); return `<rect x="${s.x - b / 2}" y="${-s.y - h}" width="${b}" height="${h}" rx="2" fill="currentColor"/>`; }).join("")}</svg>`;
+        const sch = schikking(v, (i) => v.maten[i].split("x").map(Number));
+        const x0 = Math.min(...sch.map((q) => q.x)), x1 = Math.max(...sch.map((q) => q.x + q.b)), y1 = Math.max(...sch.map((q) => q.y + q.h));
+        const svg = `<svg viewBox="${x0 - 8} ${-y1 - 8} ${x1 - x0 + 16} ${y1 + 16}" aria-hidden="true">${sch.map((q) => `<rect x="${q.x}" y="${-(q.y + q.h)}" width="${q.b}" height="${q.h}" rx="2" fill="currentColor"/>`).join("")}</svg>`;
         return `<button type="button" class="indeling" data-indeling="${k}" aria-pressed="${k === st.indeling}">${svg}<span>${v.naam}</span></button>`;
       }).join("");
       $("[data-vakken]").innerHTML = vakken().map((v, i) => {
@@ -499,6 +531,7 @@
       planner._regels = regels;
       const u = new URL(location.href);
       u.searchParams.set("l", st.indeling); u.searchParams.set("p", st.posters.slice(0, vakken().length).join(","));
+      st.maten.some(Boolean) ? u.searchParams.set("m", vakken().map((v, i) => st.maten[i] || v.m).join(",")) : u.searchParams.delete("m");
       st.eigen ? u.searchParams.delete("k") : u.searchParams.set("k", st.kamer);
       st.lijst === "auto" ? u.searchParams.delete("f") : u.searchParams.set("f", st.lijst);
       try { history.replaceState(null, "", u); } catch { /* offline demo */ }
