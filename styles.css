@@ -804,3 +804,17 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .gidsstap:has(.gidsstap__breed) > figure { order: 0; }
 .gidsstap__breed { order: 5; }
 .lijstkop--scene .lijstkop__in { z-index: 1; }
+
+/* ---------- Speelse elementen in de zijkanten van categoriepagina's ---------- */
+.sectie--speels { position: relative; overflow-x: clip; }
+.sectie--speels > .wrap { position: relative; z-index: 1; }
+.speels { position: absolute; z-index: 0; pointer-events: none; display: none; }
+@media (min-width: 1380px) { .speels { display: block; } }
+.speels--links { left: max(-30px, calc((100vw - var(--wrap)) / 2 - 150px)); }
+.speels--rechts { right: max(-30px, calc((100vw - var(--wrap)) / 2 - 170px)); }
+.speels--veeg { top: 520px; width: 230px; transform: rotate(-24deg); }
+.speels--hanger { top: 260px; width: 92px; }
+.speels--hanger .speels__schommel { transform-origin: 40px 8px; animation: schommel 4.5s ease-in-out infinite; transform-box: view-box; }
+.speels--krul { top: 340px; width: 56px; }
+.speels--stippen { top: 600px; width: 130px; height: 190px; background: radial-gradient(circle, var(--tomaat) 0 5px, transparent 6px) 0 0 / 26px 26px; -webkit-mask: linear-gradient(135deg, #000 35%, transparent 85%); mask: linear-gradient(135deg, #000 35%, transparent 85%); }
+.speels svg { width: 100%; height: auto; display: block; overflow: visible; }
