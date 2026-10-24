@@ -101,10 +101,10 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .kop__in { position: relative; }
 .nav__item--uitklap { position: static; }
 .nav__item--uitklap > a::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-3px) rotate(45deg); transition: transform .2s; }
-.nav__item--uitklap:hover > a::after, .nav__item--uitklap:focus-within > a::after { transform: translateY(0) rotate(-135deg); }
+.nav__item--uitklap.open > a::after, .nav__item--uitklap:focus-within > a::after { transform: translateY(0) rotate(-135deg); }
 /* Megamenu: stijlen links, live voorbeeld rechts, ruimtes onderaan */
 .mega { position: absolute; top: calc(100% + 1px); left: 50%; width: min(1040px, calc(100vw - 2 * var(--gutter))); transform: translate(-50%, 8px); display: grid; grid-template-columns: 290px 1fr; background: var(--wit); border-radius: 0 0 var(--r) var(--r); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .35); border: 1px solid var(--lijn); border-top: 0; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .2s, transform .25s cubic-bezier(.2, .9, .3, 1), visibility .2s; z-index: 50; }
-.nav__item--uitklap:hover .mega, .nav__item--uitklap:focus-within .mega { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.nav__item--uitklap.open .mega, .nav__item--uitklap:focus-within .mega { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
 .mega::before { content: ""; position: absolute; top: -24px; left: 0; right: 0; height: 24px; }
 .mega__kop { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--inkt-2); font-weight: 700; margin: 0 0 10px 12px; }
 .mega__lijst { padding: 22px 14px 18px; border-right: 1px solid var(--lijn); display: flex; flex-direction: column; }

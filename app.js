@@ -166,8 +166,17 @@
   if (mega) {
     // Beelden pas ophalen als iemand het menu opent: scheelt ruim 40 beelden per pagina
     const laadMega = () => $$("img[data-src]", mega).forEach((im) => { im.src = im.dataset.src.startsWith("/") ? pad(im.dataset.src) : im.dataset.src; im.removeAttribute("data-src"); });
-    const uitklap = mega.closest(".nav__item--uitklap");
+    const uitklap = mega.closest(".nav__item--uitklap"), knop = uitklap.querySelector(":scope > a");
     ["mouseenter", "focusin", "touchstart"].forEach((ev) => uitklap.addEventListener(ev, laadMega, { once: true, passive: true }));
+    // Openen alleen als je echt op "Posters" in de balk komt (met een korte vertraging, zodat langs bewegen niets doet);
+    // sluiten bij verlaten of zodra je scrollt. Het toetsenbord werkt via :focus-within in de css.
+    let openTimer, dichtTimer;
+    const dicht = () => { clearTimeout(openTimer); uitklap.classList.remove("open"); };
+    knop.addEventListener("mouseenter", () => { clearTimeout(dichtTimer); openTimer = setTimeout(() => uitklap.classList.add("open"), 140); });
+    knop.addEventListener("mouseleave", () => clearTimeout(openTimer));
+    uitklap.addEventListener("mouseleave", () => { clearTimeout(openTimer); dichtTimer = setTimeout(dicht, 220); });
+    mega.addEventListener("mouseenter", () => clearTimeout(dichtTimer));
+    addEventListener("scroll", () => { if (uitklap.classList.contains("open")) { dicht(); document.activeElement?.closest?.("[data-mega]") && document.activeElement.blur(); } }, { passive: true });
     const kies = (stijl) => {
       $$("[data-mega-stijl]", mega).forEach((a) => a.classList.toggle("actief", a.dataset.megaStijl === stijl));
       $$("[data-mega-voorbeeld]", mega).forEach((v) => v.classList.toggle("actief", v.dataset.megaVoorbeeld === stijl));
