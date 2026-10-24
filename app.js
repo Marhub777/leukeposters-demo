@@ -702,6 +702,15 @@
       : "Dit is de conceptversie van de nieuwe site. Betalen via Mollie en het automatisch doorzetten naar de drukker worden in de volgende stap gekoppeld. Er is niets besteld.";
   });
 
+  // Videoloop in de kop: stil bij "minder beweging", en pauzeren als hij uit beeld is (scheelt batterij)
+  const heldVideo = $("[data-held-video]");
+  if (heldVideo) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { heldVideo.removeAttribute("autoplay"); heldVideo.pause(); }
+    else if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([e]) => { e.isIntersecting ? heldVideo.play().catch(() => {}) : heldVideo.pause(); }).observe(heldVideo);
+    }
+  }
+
   tekenMand();
   tekenHarten();
 })();

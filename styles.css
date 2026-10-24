@@ -683,3 +683,6 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
   .productpagina .hulp { bottom: 80px; }
 }
 .hulp svg.pim, .vierhonderdvier svg.pim { width: 100%; height: auto; fill: initial; stroke: none !important; }
+
+.held__video { display: block; aspect-ratio: 3 / 2; object-fit: cover; background: var(--papier-2); }
+@media (prefers-reduced-motion: reduce) { .held__video { animation: none; } }
