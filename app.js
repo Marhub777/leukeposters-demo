@@ -297,6 +297,32 @@
     $("[data-zoeklaag-input]").addEventListener("keydown", (ev) => { if (ev.key === "Enter") location.href = pad("/alle-posters/") + "?q=" + encodeURIComponent(ev.target.value); });
   }
 
+  /* ---------------- Gedeeld tekenwerk: poster in een lijst op een kamerfoto (productpagina en muurplanner) ---------------- */
+  const beeldCache = {};
+  const laadBeeld = (src) => (beeldCache[src] ??= new Promise((ok, fout) => { const im = new Image(); im.onload = () => ok(im); im.onerror = fout; im.src = src; }));
+  const LIJSTKLEUR = { zwart: "#18161d", eiken: "#b88a5a", wit: "#f4f1ea" };
+  function tekenLijst(ctx, im, x, y, W, H, kleur, d) {
+    const w = W - 2 * d, h = H - 2 * d;
+    ctx.save(); // zachte schaduw op de muur, licht van linksboven
+    ctx.shadowColor = "rgba(20,14,10,.42)"; ctx.shadowBlur = Math.max(10, d * 2.6); ctx.shadowOffsetX = d * 0.55; ctx.shadowOffsetY = d * 1.0;
+    ctx.fillStyle = kleur; ctx.fillRect(x, y, W, H); ctx.restore();
+    ctx.save(); // strakke contactschaduw
+    ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = d * 0.45; ctx.shadowOffsetY = d * 0.15;
+    ctx.fillStyle = kleur; ctx.fillRect(x, y, W, H); ctx.restore();
+    const g = ctx.createLinearGradient(x, y, x + W, y + H); // afschuining van de lijst
+    g.addColorStop(0, "rgba(255,255,255,.2)"); g.addColorStop(0.45, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.2)");
+    ctx.fillStyle = g; ctx.fillRect(x, y, W, H);
+    const r = Math.max(w / im.width, h / im.height), sw = w / r, sh = h / r; // poster vullend in de lijst
+    ctx.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, x + d, y + d, w, h);
+    ctx.save(); // schaduw van de lijst op de poster
+    ctx.beginPath(); ctx.rect(x + d, y + d, w, h); ctx.clip();
+    ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = d * 0.9; ctx.shadowOffsetX = d * 0.2; ctx.shadowOffsetY = d * 0.3;
+    ctx.lineWidth = d; ctx.strokeStyle = "#000"; ctx.strokeRect(x + d / 2, y + d / 2, w + d, h + d); ctx.restore();
+    const glans = ctx.createLinearGradient(x, y, x + W * 0.7, y + H);
+    glans.addColorStop(0, "rgba(255,255,255,.08)"); glans.addColorStop(0.4, "rgba(255,255,255,0)");
+    ctx.fillStyle = glans; ctx.fillRect(x + d, y + d, w, h);
+  }
+
   /* ---------------- Productpagina ---------------- */
   const product = $("[data-product]");
   if (product) {
@@ -313,9 +339,40 @@
       const u = new URL(location.href); u.searchParams.set("maat", m);
       try { history.replaceState(null, "", u); } catch { /* offline demo: adresbalk blijft gelijk */ }
       tekenVergelijker(m);
+      tekenKamer(m);
       const planLink = $(".koop__planner");
       if (planLink) planLink.href = pad("/muurplanner/") + `?p=${product.dataset.product}&l=een&m=${sleutel(m)}`;
     };
+    // De eerste kamerfoto wordt live getekend op het gekozen formaat: zelfde kamer, zelfde plek, ware grootte.
+    // Past een groot formaat niet op de foto, dan wordt de muur naar boven (en iets opzij) verlengd.
+    const dia0 = $("[data-dia='0']"), foto0 = dia0 && $("img", dia0), onderschrift = dia0 && $("figcaption", dia0);
+    let doek, tekenNr = 0;
+    async function tekenKamer(m) {
+      if (!foto0) return;
+      const nr = ++tekenNr;
+      try {
+        const c = await catalogus(), p = c.producten.find((x) => x.s === product.dataset.product), k = p && c.kamers[p.a];
+        if (!k) return;
+        const [achter, poster] = await Promise.all([laadBeeld(`${IMG}kamers-leeg/${p.a}-1264.webp`), laadBeeld(`${IMG}poster/${p.s}-960.webp`)]);
+        if (nr !== tekenNr) return;
+        const f = achter.width / 1264, pxcm = k.pxcm * f, d = 2.2 * pxcm;
+        const [b, h] = m.split("x").map(Number), W = b * pxcm + 2 * d, H = h * pxcm + 2 * d;
+        const marge = achter.height * 0.07, yPoster = k.onder * f - H, X = 0;
+        const E = Math.max(0, Math.ceil(marge - yPoster));
+        doek ??= Object.assign(document.createElement("canvas"), { className: "galerij__doek" });
+        doek.width = achter.width; doek.height = achter.height + E;  // de css snijdt bij een hogere foto vooral de vloer weg
+        const ctx = doek.getContext("2d"), y0 = Math.round((k.plafond || 0) * f);
+        if (E) {
+          const strook = Math.max(4, Math.round(achter.height * 0.012));
+          ctx.drawImage(achter, 0, y0, achter.width, strook, 0, 0, achter.width, E + y0 + 1); // muur en gordijnen naar boven doortrekken
+        }
+        ctx.drawImage(achter, 0, y0, achter.width, achter.height - y0, 0, E + y0, achter.width, achter.height - y0);
+        tekenLijst(ctx, poster, X + k.cx * f - W / 2, E + yPoster, W, H, LIJSTKLEUR[p.j] || LIJSTKLEUR.zwart, d);
+        if (!doek.isConnected) { foto0.hidden = true; foto0.after(doek); }
+        if (onderschrift) onderschrift.textContent = `Op ware grootte ${onderschrift.dataset.waar || ""}, formaat ${m.replace("x", " × ")} cm`;
+        $$("[data-duim]")[0]?.click();
+      } catch { /* geen kamerfoto beschikbaar: de vaste foto blijft staan */ }
+    }
     function tekenVergelijker(m) {
       const [b, h] = m.split("x").map(Number), schaal = 0.8;
       const w = b * schaal, hh = h * schaal, x = 158 - w / 2, y = 130 - hh;
@@ -472,8 +529,7 @@
       pos: [],
     };
     const canvas = $("[data-canvas]"), ctx = canvas.getContext("2d");
-    const beelden = {};
-    const laad = (src) => (beelden[src] ??= new Promise((ok, fout) => { const im = new Image(); im.onload = () => ok(im); im.onerror = fout; im.src = src; }));
+    const laad = laadBeeld;
     let c, per, achter, pxcm = 3, anker = { x: 0, y: 0 }, plafond = 0, verschuif = 0, sleep = null, gepland = false;
 
     const vakken = () => INDELINGEN[st.indeling].maten.map((m) => ({ m }));
@@ -529,27 +585,7 @@
       canvas.width = achter.width;
       canvas.height = achter.height + verschuif;
     }
-    function omlijst(im, x, y, W, H, kleur) {
-      const d = LIJST_CM * pxcm, w = W - 2 * d, h = H - 2 * d;
-      ctx.save(); // zachte schaduw op de muur, licht van linksboven
-      ctx.shadowColor = "rgba(20,14,10,.42)"; ctx.shadowBlur = Math.max(10, d * 2.6); ctx.shadowOffsetX = d * 0.55; ctx.shadowOffsetY = d * 1.0;
-      ctx.fillStyle = kleur; ctx.fillRect(x, y, W, H); ctx.restore();
-      ctx.save(); // strakke contactschaduw
-      ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = d * 0.45; ctx.shadowOffsetY = d * 0.15;
-      ctx.fillStyle = kleur; ctx.fillRect(x, y, W, H); ctx.restore();
-      const g = ctx.createLinearGradient(x, y, x + W, y + H); // afschuining van de lijst
-      g.addColorStop(0, "rgba(255,255,255,.2)"); g.addColorStop(0.45, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.2)");
-      ctx.fillStyle = g; ctx.fillRect(x, y, W, H);
-      const r = Math.max(w / im.width, h / im.height), sw = w / r, sh = h / r; // poster vullend in de lijst
-      ctx.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, x + d, y + d, w, h);
-      ctx.save(); // schaduw van de lijst op de poster
-      ctx.beginPath(); ctx.rect(x + d, y + d, w, h); ctx.clip();
-      ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = d * 0.9; ctx.shadowOffsetX = d * 0.2; ctx.shadowOffsetY = d * 0.3;
-      ctx.lineWidth = d; ctx.strokeStyle = "#000"; ctx.strokeRect(x + d / 2, y + d / 2, w + d, h + d); ctx.restore();
-      const glans = ctx.createLinearGradient(x, y, x + W * 0.7, y + H);
-      glans.addColorStop(0, "rgba(255,255,255,.08)"); glans.addColorStop(0.4, "rgba(255,255,255,0)");
-      ctx.fillStyle = glans; ctx.fillRect(x + d, y + d, w, h);
-    }
+    const omlijst = (im, x, y, W, H, kleur) => tekenLijst(ctx, im, x, y, W, H, kleur, LIJST_CM * pxcm);
     async function teken(voorDownload = false) {
       const ims = await Promise.all(vakken().map((_, i) => st.posters[i] ? laad(`${IMG}poster/${st.posters[i]}-960.webp`).catch(() => laad(`${IMG}poster/${st.posters[i]}-480.webp`)) : null));
       if (verschuif) {
@@ -722,6 +758,15 @@
       new IntersectionObserver(([e]) => { e.isIntersecting ? heldVideo.play().catch(() => {}) : heldVideo.pause(); }).observe(heldVideo);
     }
   }
+
+  // Nieuwsbrief: zonder ingestelde dienst (NIEUWSBRIEF_ACTIE in inhoud.py) alleen een bevestiging tonen
+  $$("[data-nieuwsbrief]").forEach((f) => f.addEventListener("submit", (ev) => {
+    if (f.getAttribute("action")) return;
+    ev.preventDefault();
+    if (!f.reportValidity()) return;
+    $("[data-nieuwsbrief-dank]", f).hidden = false;
+    $$("input, button", f).forEach((el) => { el.disabled = true; });
+  }));
 
   tekenMand();
   tekenHarten();

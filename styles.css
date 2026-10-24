@@ -818,3 +818,58 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .speels--krul { top: 340px; width: 56px; }
 .speels--stippen { top: 600px; width: 130px; height: 190px; background: radial-gradient(circle, var(--tomaat) 0 5px, transparent 6px) 0 0 / 26px 26px; -webkit-mask: linear-gradient(135deg, #000 35%, transparent 85%); mask: linear-gradient(135deg, #000 35%, transparent 85%); }
 .speels svg { width: 100%; height: auto; display: block; overflow: visible; }
+.galerij__doek { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }
+
+/* ---------- Thema's (kerst, valentijn, ...): alleen zichtbaar als html[data-thema] past, zie concept.css ---------- */
+.thema-tekst, .actiebalk .thema-tekst, p.sticker.thema-tekst { display: none; }
+html[data-thema] .actiebalk p > span:not(.thema-tekst), html[data-thema] .thema-standaard { display: none; }
+html[data-thema] .actiebalk { background: var(--thema); }
+html[data-thema] .actiebalk b, html[data-thema] .actiebalk svg { color: #fff; stroke: #fff; }
+html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
+.themablok { background: var(--thema, var(--tomaat)); color: #fff; position: relative; overflow: hidden; }
+.themablok::before, .themablok::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .12); }
+.themablok::before { width: 320px; height: 320px; right: -80px; top: -160px; }
+.themablok::after { width: 180px; height: 180px; left: 8%; bottom: -120px; }
+.themablok__in { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px 32px; padding-top: 26px; padding-bottom: 26px; }
+.themablok__label { grid-column: 1; grid-row: 1 / span 2; justify-self: start; margin: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; background: #fff; color: var(--thema); border-radius: 999px; padding: 6px 16px; transform: rotate(-4deg); }
+.themablok h2 { grid-column: 2; margin: 0; font-size: clamp(1.5rem, 2.6vw, 2.1rem); color: #fff; }
+.themablok p:not(.themablok__label) { margin: 0; color: rgba(255, 255, 255, .9); grid-column: 2; }
+.themablok .knop { grid-row: 1 / span 2; grid-column: 3; background: #fff; color: var(--inkt); box-shadow: none; }
+@media (max-width: 760px) { .themablok__in { grid-template-columns: 1fr; } .themablok__label { justify-self: start; grid-row: auto; } .themablok h2, .themablok p:not(.themablok__label), .themablok .knop { grid-column: auto; grid-row: auto; justify-self: start; } }
+
+/* ---------- Contourlijn rond de posters in het overzicht ---------- */
+.kaart__beeld { outline: 1.5px solid color-mix(in srgb, var(--inkt) 22%, transparent); outline-offset: 6px; }
+@media (hover: hover) { .kaart:hover .kaart__beeld { outline-color: var(--tomaat); outline-width: 2px; } }
+
+/* ---------- Doorkijk: groepsfoto door een boog ---------- */
+.doorkijk { padding: clamp(56px, 8vw, 100px) 0; background: linear-gradient(180deg, var(--papier) 0 55%, var(--papier-2) 55%); }
+.doorkijk__in { display: grid; grid-template-columns: 1.25fr .75fr; gap: clamp(28px, 5vw, 64px); align-items: center; }
+.doorkijk__boog { margin: 0; position: relative; border-radius: 999px 999px 26px 26px; overflow: hidden; aspect-ratio: 4 / 3.4; border: 12px solid var(--inkt); box-shadow: 0 0 0 6px var(--blush), 0 40px 70px -30px rgba(14, 59, 47, .6); }
+.doorkijk__boog img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; transform: scale(1.04); transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); }
+.doorkijk__boog:hover img { transform: scale(1.1); }
+.doorkijk__tekst h2 { font-size: clamp(2rem, 4vw, 3rem); }
+.doorkijk__lijst { margin: 18px 0 24px; padding: 0; list-style: none; counter-reset: dk; display: grid; gap: 6px; }
+.doorkijk__lijst li { counter-increment: dk; display: flex; gap: 10px; align-items: center; }
+.doorkijk__lijst li::before { content: counter(dk); display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--blush); font-weight: 800; font-size: .8rem; flex-shrink: 0; }
+.doorkijk__lijst a { text-decoration: none; font-weight: 600; }
+.doorkijk__lijst a:hover { text-decoration: underline; text-decoration-color: var(--tomaat); }
+
+/* ---------- Nieuwsbrief ---------- */
+.nieuwsbrief { background: var(--blush); color: var(--inkt); position: relative; overflow: hidden; }
+.nieuwsbrief::after { content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%; background: var(--tomaat); right: -90px; top: -120px; opacity: .9; }
+.nieuwsbrief__in { position: relative; z-index: 1; display: grid; grid-template-columns: auto 1.2fr 1fr; gap: clamp(20px, 4vw, 48px); align-items: center; padding-top: 44px; padding-bottom: 44px; }
+.nieuwsbrief__pim { width: 110px; }
+.nieuwsbrief__pim svg.pim { stroke: none; }
+.nieuwsbrief h2 { margin: 0 0 .3em; }
+.nieuwsbrief h2 em { color: var(--inkt); text-decoration: underline; text-decoration-color: var(--tomaat); text-decoration-thickness: 4px; text-underline-offset: 6px; }
+.nieuwsbrief p { margin: 0; }
+.nieuwsbrief__form { display: flex; flex-wrap: wrap; gap: 10px; background: var(--wit); padding: 10px; border-radius: 22px; box-shadow: 0 20px 40px -24px rgba(14, 59, 47, .6); }
+.nieuwsbrief__form input { flex: 1; min-width: 160px; border: 0; background: var(--papier); border-radius: 14px; padding: 12px 14px; font-size: 1rem; outline: none; }
+.nieuwsbrief__form input:focus { box-shadow: 0 0 0 2px var(--inkt); }
+.nieuwsbrief__klein { width: 100%; font-size: .78rem; color: var(--inkt-2); padding: 0 6px; }
+.nieuwsbrief__dank { width: 100%; font-weight: 700; padding: 4px 6px; }
+@media (max-width: 900px) {
+  .doorkijk__in, .nieuwsbrief__in { grid-template-columns: 1fr; }
+  .nieuwsbrief__pim { width: 80px; }
+  .doorkijk__boog { border-width: 8px; }
+}
