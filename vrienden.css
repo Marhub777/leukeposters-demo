@@ -1,0 +1,61 @@
+/* Vaste vrienden: rustig, vaste plek, korte bewegingen (zie vrienden.js en personages-concept.md) */
+.vriend { position: absolute; top: 0; right: 10%; z-index: 4; width: var(--b, 90px); pointer-events: none; }
+.vriend__lijf { all: unset; display: block; position: relative; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+.vriend__lijf:focus-visible { outline: 3px solid var(--tomaat); outline-offset: 4px; border-radius: 8px; }
+.vriend img, .lijstkop__beeld .vriend img, .kaart__beeld img.vriend-gluur {
+  display: block; width: 100%; height: auto; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+  outline: 0 !important; background: none !important; transform: none; max-height: none; }
+.vriend__lijf { filter: drop-shadow(0 6px 6px rgba(14, 59, 47, .25)); }
+.vriend__kleur { position: absolute; inset: 0; opacity: 0; }
+.vriend__gluren { display: none !important; }
+
+/* Ballon: alleen als je hem aantikt */
+.vriend__ballon { position: absolute; bottom: calc(100% + 8px); right: 0; width: max-content; max-width: 240px; opacity: 0; transform: translateY(6px) scale(.9);
+  transform-origin: 85% 100%; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 5;
+  background: var(--papier); color: var(--inkt); border: 2px solid var(--inkt); border-radius: 14px; padding: 8px 12px;
+  font: 600 .85rem/1.35 var(--tekst, sans-serif); box-shadow: 3px 3px 0 var(--inkt); }
+.vriend__ballon a { color: var(--tomaat); white-space: nowrap; }
+.vriend.praat .vriend__ballon { opacity: 1; transform: none; pointer-events: auto; }
+/* Vrienden op de bovenrand: ballon eronder, want erboven is geen ruimte */
+.vriend--aap .vriend__ballon, .vriend--kameleon .vriend__ballon { bottom: auto; top: calc(100% + 6px); transform-origin: 85% 0; }
+
+/* Aap: hangt aan de bovenrand van de foto, slingert 1 keer uit */
+.vriend--aap { --b: 84px; right: 14%; top: -38px; }
+.vriend--aap .vriend__lijf { transform-origin: 50% 3%; }
+.vriend--aap.speelt .vriend__lijf { animation: vriend-slinger 2.6s ease-in-out; }
+@keyframes vriend-slinger { 0% { transform: rotate(0); } 18% { transform: rotate(12deg); } 42% { transform: rotate(-9deg); } 64% { transform: rotate(5deg); } 84% { transform: rotate(-2deg); } 100% { transform: rotate(0); } }
+
+/* Gelukskat: zit rechtsonder op de hoek van de foto en zwaait (animatie in vrienden.js) */
+.vriend--kat { --b: 80px; top: auto; bottom: -10%; right: -3%; }
+.vriend--kat .vriend__ballon { right: 10px; }
+.vriend--kat.speelt .vriend__lijf { animation: vriend-hup .6s ease-out; }  /* alleen als de animatie (nog) niet geladen is */
+@keyframes vriend-hup { 40% { transform: translateY(-8px); } }
+
+/* Kameleon: ligt op een takje op de bovenrand en kleurt heel even op */
+.vriend--kameleon { --b: 140px; right: 5%; transform: translateY(-64%); }
+.vriend--kameleon.speelt .vriend__kleur { animation: vriend-kleur 2.6s ease-in-out; }
+@keyframes vriend-kleur { 0% { opacity: 0; } 30%, 62% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Kiekeboe: komt van achter zijn eigen poster omhoog. Desktop bij hover, mobiel 1 keer als hij in beeld komt */
+.kaart--vriend .kaart__poster { position: relative; z-index: 2; }
+.kaart--vriend .kaart__sfeer { z-index: 3; }
+.kaart--vriend:hover .kaart__sfeer { transition-delay: 1.4s; }
+.kaart__beeld img.vriend-gluur { position: absolute; left: 50%; top: 13%; width: 34%; z-index: 1; transform: translate(-50%, 10%);
+  transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); pointer-events: none; }
+.kaart--vriend:hover img.vriend-gluur, .kaart--vriend.kiekeboe img.vriend-gluur { transform: translate(-50%, -80%); }
+.kaart__beeld img.vriend-gluur--kameleon { width: 30%; }
+
+/* Productpagina: klein en stil */
+.vriend-ik { display: flex; align-items: center; gap: 10px; margin: -4px 0 12px; font-size: .92rem; color: var(--tekst, inherit); }
+.vriend-ik img { width: 44px; height: auto; flex: none; border: 0; box-shadow: none; }
+.vriend-ik a { color: var(--tomaat); }
+
+@media (max-width: 700px) {
+  .vriend--aap { --b: 62px; top: -28px; }
+  .vriend--kat { --b: 60px; }
+  .vriend--kameleon { --b: 112px; }
+  .vriend__ballon { max-width: 200px; font-size: .8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vriend .vriend__lijf, .vriend .vriend__kleur, .vriend__ballon, .kaart__beeld img.vriend-gluur { animation: none !important; transition: none !important; }
+}
