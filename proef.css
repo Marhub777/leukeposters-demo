@@ -1,0 +1,40 @@
+/* PROEF: personages komen tot leven (alleen kinderposters, wegwerpversie) */
+.aap { position: absolute; z-index: 25; cursor: pointer; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 6px 6px rgba(14,59,47,.25)); }
+.aap img, .lijstkop__beeld .aap img { display: block; border: 0; border-radius: 0; box-shadow: none; transform: none; background: none; width: 100%; height: auto; pointer-events: none; }
+.aap__ballon { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%) scale(.6); opacity: 0; transition: .2s; white-space: nowrap;
+  background: var(--papier); color: var(--inkt); border: 2px solid var(--inkt); border-radius: 14px; padding: 7px 12px; font: 600 .85rem/1.3 var(--font-tekst, sans-serif); box-shadow: 3px 3px 0 var(--inkt); pointer-events: none; }
+.aap__ballon a { color: var(--tomaat); pointer-events: auto; }
+.aap.praat .aap__ballon { opacity: 1; transform: translateX(-50%) scale(1); pointer-events: auto; }
+.idee { position: absolute; z-index: 26; background: var(--tomaat); color: #fff; font: 700 .72rem/1 var(--font-tekst, sans-serif); letter-spacing: .06em; text-transform: uppercase; padding: 6px 9px; border-radius: 999px; white-space: nowrap; pointer-events: none; }
+
+/* Idee 1: slingeraap aan de foto in de kop */
+.lijstkop__beeld { position: relative; }
+.aap--slinger { width: 92px; top: -34px; right: 14%; transform-origin: 50% 2%; animation: slinger 2.8s ease-in-out infinite; }
+.aap--slinger:hover { animation-duration: 1.2s; }
+@keyframes slinger { 0%,100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }
+.idee--1 { top: -50px; right: calc(14% + 100px); }
+
+/* Idee 2: wandelaap onderaan het scherm, blijft altijd in beeld */
+.aap--wandel { position: fixed; width: 70px; bottom: 4px; left: 0; z-index: 45; }
+.aap--wandel .aap__lijf { animation: huppel .42s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.aap--wandel.zit .aap__lijf { animation: none; }
+.aap--wandel.links .aap__lijf img { transform: scaleX(-1); }
+@keyframes huppel { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-7px) rotate(4deg); } }
+.aap--wandel .idee { bottom: calc(100% + 8px); left: 0; transition: opacity .6s; }
+.aap--wandel.praat .idee, .aap--wandel.stil .idee { opacity: 0; }
+
+/* Idee 3: kiekeboe achter de lijst van de A-poster */
+.kaart--aap .kaart__poster { position: relative; z-index: 2; }
+.aap--gluur { width: 30%; left: 50%; top: 13%; z-index: 1; transform: translate(-50%, 8%); transition: transform .5s cubic-bezier(.3,1.6,.5,1); filter: none; }
+.aap--gluur.op, .kaart--aap:hover .aap--gluur { transform: translate(-50%, -84%); }
+.idee--3 { bottom: 10px; left: 10px; z-index: 3; }
+
+.proefuitleg { position: fixed; right: 16px; top: 128px; z-index: 60; width: 320px; background: var(--inkt); color: var(--papier); border-radius: 18px; font: .86rem/1.45 var(--font-tekst, sans-serif); box-shadow: 0 18px 40px -16px rgba(0,0,0,.5); }
+.proefuitleg summary { cursor: pointer; padding: 10px 16px; font-weight: 700; color: var(--zon); list-style: none; }
+.proefuitleg summary::-webkit-details-marker { display: none; }
+.proefuitleg summary::after { content: " ▾"; }
+.proefuitleg[open] summary::after { content: " ▴"; }
+.proefuitleg div { padding: 0 16px 12px; }
+.proefuitleg ol { margin: 0 0 6px; padding-left: 18px; }
+@media (max-width: 700px) { .aap--slinger { width: 64px; } .idee--1 { display: none; } .proefuitleg { top: 76px; right: 8px; width: auto; max-width: calc(100% - 16px); } .aap--wandel { width: 54px; } }
+@media (prefers-reduced-motion: reduce) { .aap--slinger, .aap--wandel .aap__lijf { animation: none; } }
