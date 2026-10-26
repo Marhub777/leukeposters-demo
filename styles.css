@@ -888,3 +888,91 @@ html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
 .lichtbak__knoppen button { width: 46px; height: 46px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .92); color: var(--inkt); font: 700 1.4rem/1 var(--tekst); display: grid; place-items: center; }
 .lichtbak__knoppen svg { width: 20px; height: 20px; fill: none; stroke: var(--inkt); stroke-width: 2.4; }
 .lichtbak__hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); margin: 0; color: rgba(255, 255, 255, .8); font-size: .85rem; background: rgba(0, 0, 0, .35); padding: 6px 14px; border-radius: 999px; white-space: nowrap; }
+
+/* ---------- Mobiel menu: hoofdonderdelen als tegels bovenaan, stijlen en ruimtes compact eronder ---------- */
+@media (max-width: 900px) {
+  .nav__lijst { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .nav__item > a { background: var(--wit); border-radius: 16px; padding: 16px; font-size: 1.15rem; box-shadow: 0 6px 16px -10px rgba(14, 59, 47, .35); }
+  .nav__item--uitklap { grid-column: 1 / -1; order: 5; }
+  .nav__item--uitklap > a { background: var(--inkt); color: var(--papier); }
+  .nav__item--uitklap > a::after { display: none; }
+  .mega { padding-top: 6px; }
+  .mega__lijst ul { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mega__lijst li a { padding: 8px 14px; background: var(--wit); border-radius: 999px; font-size: .92rem; }
+  .mega__lijst li a:hover, .mega__lijst li a.actief { padding-left: 14px; }
+  .mega__lijst li a small, .mega__lijst li a svg, .mega__alle { display: none; }
+  .mega__kop { margin: 14px 0 8px; }
+  .mega__ruimtes .mega__kop { width: 100%; }
+}
+
+/* ---------- Klassiek met een twist: museumzaal die is "overgenomen" ---------- */
+.cat-twist { --museum: #3B1018; --museum-2: #2A0B11; --goud: #C9A45C; }
+.cat-twist .lijstkop--scene { background: var(--museum); }
+.cat-twist .lijstkop--scene::before { background: linear-gradient(100deg, color-mix(in srgb, var(--museum) 94%, transparent) 25%, color-mix(in srgb, var(--museum) 70%, transparent) 60%, color-mix(in srgb, var(--museum) 45%, transparent)); }
+.cat-twist .lijstkop__scene { filter: grayscale(1) sepia(.5) contrast(1.1) blur(5px); }
+.cat-twist .lijstkop--scene h1 { font-family: "Fraunces", Georgia, serif; font-weight: 500; letter-spacing: -.01em; line-height: 1; position: relative; }
+.twist__klassiek { display: block; font-style: italic; color: #F3E6CC; font-variation-settings: "SOFT" 0, "WONK" 0, "opsz" 144; }
+.twist__spray { display: inline-block; font-family: var(--display); font-weight: 800; font-size: .62em; color: var(--blush); transform: rotate(-5deg) translate(.6em, -.15em); text-shadow: 0 0 2px var(--blush), 0 0 10px color-mix(in srgb, var(--blush) 70%, transparent), 3px 4px 0 rgba(0, 0, 0, .35); letter-spacing: -.01em; }
+.cat-twist .lijstkop--scene .krul { color: var(--goud); }
+.cat-twist .lijstkop__spook { -webkit-text-stroke-color: color-mix(in srgb, var(--goud) 30%, transparent); font-family: "Fraunces", Georgia, serif; font-style: italic; }
+.cat-twist .lijstkop__aantal { background: var(--goud); }
+.cat-twist .lijstkop--scene::after { background: var(--blush); opacity: .25; }
+.cat-twist .lijstkop__golf path { fill: var(--museum-2); }
+/* De zaal: donkere damastmuur, gouden lijsten, spotjes en museumbordjes */
+.cat-twist .sectie--speels { background:
+  radial-gradient(circle at 25% 25%, rgba(201, 164, 92, .06) 0 6px, transparent 7px) 0 0 / 46px 46px,
+  radial-gradient(circle at 75% 75%, rgba(201, 164, 92, .06) 0 6px, transparent 7px) 0 0 / 46px 46px,
+  var(--museum-2); color: #F3E6CC; }
+.cat-twist .lijstkop--scene + .sectie--krap .filter { background: #F3E6CC; }
+.cat-twist .kaart__beeld { background: radial-gradient(ellipse 60% 45% at 50% 0%, rgba(255, 238, 200, .28), transparent 70%), transparent !important; box-shadow: none; outline-color: color-mix(in srgb, var(--goud) 35%, transparent); }
+.cat-twist .kaart__poster { border-style: solid; border-width: 10px !important; border-color: #E2C27A #B48A3E #8C6A2C #CFA75A !important; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25), 0 2px 3px rgba(0, 0, 0, .4), 0 26px 40px -14px rgba(0, 0, 0, .8) !important; }
+.cat-twist .kaart__tekst { margin: 8px auto 0; background: #F3E6CC; color: #2A0B11; border-radius: 4px; padding: 8px 10px 10px; text-align: center; box-shadow: 0 6px 14px -8px rgba(0, 0, 0, .7); max-width: 84%; }
+.cat-twist .kaart__tekst h3 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: .95rem; }
+.cat-twist .kaart__tekst h3 a { color: #2A0B11; }
+.cat-twist .kaart__tekst p { background: none; color: #7a4e1d; padding: 0; font-style: italic; font-family: "Fraunces", Georgia, serif; }
+.cat-twist .leeg, .cat-twist .promo { color: inherit; }
+.cat-twist .speels svg path, .cat-twist .speels svg rect { stroke: var(--blush); }
+
+.cat-twist .filter { color: var(--inkt); }
+/* Op mobiel geen glas-effect op de kopbalk: dat maakt het uitklapmenu anders maar zo hoog als de balk */
+@media (max-width: 900px) { .kop { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--papier); } }
+@media (max-width: 900px) {
+  .nav { position: absolute; top: 100%; left: 0; right: 0; bottom: auto; height: calc(100dvh - 64px); border-top: 1px solid var(--lijn); }
+  body.menu-open .hulp { display: none; }
+}
+
+.kop__knop { flex-shrink: 0; }
+@media (max-width: 400px) { .kop__in { gap: 2px; } .logo__woord { font-size: 1.2rem !important; } .kop__acties { gap: 0; } }
+
+/* ---------- Formaat op maat ---------- */
+.maat--opmaat span { border-style: dashed; }
+.maat--opmaat input:checked + span { border-style: solid; }
+.opmaat { margin-top: 12px; padding: 14px 16px; border-radius: 14px; background: var(--wit); border: 1.5px dashed var(--inkt); }
+.opmaat[hidden] { display: none; }
+.opmaat__kop { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 10px; font-weight: 600; line-height: 1.35; }
+.opmaat__kop svg { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; }
+.opmaat__velden { display: flex; align-items: flex-end; gap: 10px; }
+.opmaat__velden > span { padding-bottom: 10px; font-weight: 700; }
+.opmaat__velden label { display: grid; gap: 4px; font-size: .85rem; color: var(--inkt-2); flex: 1; min-width: 0; }
+.opmaat__velden label span { display: flex; align-items: center; gap: 6px; color: var(--inkt); font-weight: 600; }
+.opmaat__velden input { width: 100%; min-width: 0; padding: 10px 12px; font: inherit; font-size: 1.05rem; border: 1.5px solid var(--lijn); border-radius: 10px; background: var(--papier); color: var(--inkt); }
+.opmaat__velden input:focus-visible { outline: 3px solid var(--tomaat); outline-offset: 1px; }
+.opmaat__noot { margin: 10px 0 0; font-size: .82rem; color: var(--inkt-2); line-height: 1.45; }
+
+/* ---------- Reviews ---------- */
+.reviews { background: var(--zon); }
+.reviews__kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; margin-bottom: 22px; }
+.reviews__kop h2 { margin: 0 0 4px; }
+.reviews__score { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.review__voorbeeld { margin: 0; padding: 6px 12px; border-radius: 999px; background: var(--inkt); color: var(--papier); font-size: .8rem; font-weight: 600; }
+.sterren { color: var(--tomaat); letter-spacing: 1px; font-size: 1.05rem; white-space: nowrap; }
+.ster--leeg { color: rgba(14, 59, 47, .25); }
+.reviews__rij { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 1fr); gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 14px; }
+.review { scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 20px; background: var(--papier); border: 2px solid var(--inkt); box-shadow: 5px 5px 0 var(--inkt); min-width: 0; }
+.review__tekst { margin: 0; font-size: 1.02rem; line-height: 1.5; flex: 1; }
+.review__naam { margin: 0; font-size: .9rem; color: var(--inkt-2); }
+.review__naam b { color: var(--inkt); }
+.review__poster { display: flex; align-items: center; gap: 10px; padding-top: 10px; border-top: 1px solid var(--lijn); color: var(--inkt); text-decoration: none; font-size: .85rem; font-weight: 600; }
+.review__poster img { width: 34px; height: auto; flex: 0 0 34px; }
+.review__poster:hover span { text-decoration: underline; }
+@media (max-width: 700px) { .reviews__rij { grid-auto-columns: 82%; } }

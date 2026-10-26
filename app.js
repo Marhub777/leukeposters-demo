@@ -24,7 +24,18 @@
     "100x140": "Statement op een grote muur. Boven een bank van 2 meter of breder.",
   };
   const sleutel = (m) => m.split("x").map(Number).sort((a, b) => a - b).join("x");
-  const prijsVan = (m) => FORMATEN[sleutel(m)] ?? 0;
+  // Formaat op maat: prijs schaalt mee met de oppervlakte tussen de vaste formaten, plus toeslag (zelfde regel als OP_MAAT in inhoud.py)
+  const OP_MAAT = { min: 20, max: 150, toeslag: 5 };
+  const prijsOpMaat = (m) => {
+    const [b, h] = m.split("x").map(Number), opp = b * h;
+    const punten = Object.entries(FORMATEN).map(([k, p]) => [k.split("x").reduce((x, y) => x * y), p]).sort((a, c) => a[0] - c[0]);
+    let i = punten.findIndex(([o]) => o >= opp);
+    if (i < 1) i = i === 0 ? 1 : punten.length - 1;
+    const [o1, p1] = punten[i - 1], [o2, p2] = punten[i];
+    const basis = Math.max(punten[0][1], p1 + (p2 - p1) * (opp - o1) / (o2 - o1));
+    return Math.ceil(basis + OP_MAAT.toeslag) - 0.01;
+  };
+  const prijsVan = (m) => FORMATEN[sleutel(m)] ?? (/^\d+x\d+$/.test(m) ? prijsOpMaat(m) : 0);
 
   // Online werkt alles met paden vanaf de root. In de offline demo (losse bestanden) zet demo.py LP_BASE en LP_CATALOGUS.
   const BASE = window.LP_BASE;
@@ -74,7 +85,7 @@
       const stukprijs = prijsVan(r.m), gratis = b.gratisPerRegel[i] || 0;
       const totaal = stukprijs * (r.a - gratis);
       return `<div class="mandregel"><img src="${IMG}poster/${r.s}-480.webp" alt="" width="64" height="91" loading="lazy">
-        <div><h3><a href="${pad(r.u)}">${esc(r.n)}</a></h3><p>${r.m.replace("x", " × ")} cm · ${euro(stukprijs)}</p>
+        <div><h3><a href="${pad(r.u)}">${esc(r.n)}</a></h3><p>${r.m.replace("x", " × ")} cm${FORMATEN[sleutel(r.m)] ? "" : " op maat"} · ${euro(stukprijs)}</p>
         ${compact ? "" : ""}<div class="aantal" role="group" aria-label="Aantal ${esc(r.n)}"><button type="button" data-min="${i}" aria-label="Eén minder">−</button><span>${r.a}</span><button type="button" data-plus="${i}" aria-label="Eén meer">+</button></div></div>
         <div class="mandregel__prijs">${gratis ? `<s>${euro(stukprijs * r.a)}</s>` : ""}${euro(totaal)}${gratis ? `<span class="mandregel__gratis">${gratis}× gratis</span>` : ""}</div></div>`;
     }).join("");
@@ -196,6 +207,8 @@
   const menuKnop = $("[data-menu-knop]"), menu = $("[data-menu]");
   menuKnop?.addEventListener("click", () => {
     const open = menu.classList.toggle("open");
+    if (open) $(".nav__item--uitklap")?.dispatchEvent(new Event("focusin"));  // laadt de kleine kamerfoto's van de ruimtes
+    document.body.classList.toggle("menu-open", open);
     menuKnop.setAttribute("aria-expanded", open);
     document.body.style.overflow = open ? "hidden" : "";
   });
@@ -329,19 +342,29 @@
     const form = $("[data-koop]"), prijsEl = $("[data-prijs]"), advies = $("[data-advies]");
     const balk = $("[data-koopbalk]"), balkPrijs = $("[data-koopbalk-prijs]");
     const vergelijker = $("[data-vergelijker]");
-    const gekozen = () => $("input[name=maat]:checked", form).value;
+    const opmaat = $("[data-opmaat]"), opB = $("[data-opmaat-b]"), opH = $("[data-opmaat-h]");
+    const cm = (el) => Math.min(OP_MAAT.max, Math.max(OP_MAAT.min, Math.round(+el.value || OP_MAAT.min)));
+    const gekozen = () => {
+      const v = $("input[name=maat]:checked", form).value;
+      return v === "op-maat" ? `${cm(opB)}x${cm(opH)}` : v;
+    };
     const wil = new URLSearchParams(location.search).get("maat");
-    if (wil) { const r = $(`input[name=maat][value="${CSS.escape(wil)}"]`, form); if (r) r.checked = true; }
+    if (wil) {
+      const r = $(`input[name=maat][value="${CSS.escape(wil)}"]`, form);
+      if (r) r.checked = true;
+      else if (/^\d+x\d+$/.test(wil) && opB) { $("input[value=op-maat]", form).checked = true; [opB.value, opH.value] = wil.split("x"); }
+    }
     const update = () => {
-      const m = gekozen(), p = prijsVan(m);
+      const m = gekozen(), p = prijsVan(m), maatwerk = !FORMATEN[sleutel(m)];
+      if (opmaat) opmaat.hidden = !maatwerk;
       prijsEl.textContent = euro(p); balkPrijs.textContent = euro(p);
-      advies.textContent = ADVIES[sleutel(m)];
+      advies.textContent = maatwerk ? `Op maat: ${m.replace("x", " × ")} cm, speciaal voor jouw plek gedrukt.` : ADVIES[sleutel(m)];
       const u = new URL(location.href); u.searchParams.set("maat", m);
       try { history.replaceState(null, "", u); } catch { /* offline demo: adresbalk blijft gelijk */ }
       tekenVergelijker(m);
       tekenKamer(m);
       const planLink = $(".koop__planner");
-      if (planLink) planLink.href = pad("/muurplanner/") + `?p=${product.dataset.product}&l=een&m=${sleutel(m)}`;
+      if (planLink) planLink.href = pad("/muurplanner/") + `?p=${product.dataset.product}&l=een` + (maatwerk ? "" : `&m=${sleutel(m)}`);
     };
     // De eerste kamerfoto wordt live getekend op het gekozen formaat: zelfde kamer, zelfde plek, ware grootte.
     // Past een groot formaat niet op de foto, dan wordt de muur naar boven (en iets opzij) verlengd.
@@ -380,6 +403,9 @@
       Object.entries({ x, y, width: w, height: hh }).forEach(([k, v]) => rect.setAttribute(k, v));
     }
     form.addEventListener("change", update);
+    let wacht;
+    opmaat?.addEventListener("input", () => { clearTimeout(wacht); wacht = setTimeout(update, 250); });
+    opmaat?.addEventListener("focusout", () => { opB.value = cm(opB); opH.value = cm(opH); });
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
       zetInMand({ s: product.dataset.product, m: gekozen(), n: product.dataset.naam, u: product.dataset.url });
