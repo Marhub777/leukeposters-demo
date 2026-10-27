@@ -336,6 +336,31 @@
     ctx.fillStyle = glans; ctx.fillRect(x + d, y + d, w, h);
   }
 
+  // Voorgrond van een kamer (planten, lampen, meubels): wordt over de posters getekend, zodat een poster erachter verdwijnt
+  const laadVoor = (k, naam) => (k && k.voor ? laadBeeld(`${IMG}kamers-voor/${naam}-1264.webp`).catch(() => null) : Promise.resolve(null));
+  // Zoek de dichtstbijzijnde plek op vrije muur voor een groep rechthoeken (pixels op de kamerfoto, schaal f t.o.v. 1264).
+  // Eerst opzij schuiven binnen het vrije stuk muur, anders stap voor stap hoger hangen (boven de lamp of plant).
+  function vrijePlek(k, f, rects, maxOmhoog) {
+    if (!k || !k.vrij || !rects.length) return { dx: 0, dy: 0 };
+    const x0 = Math.min(...rects.map((r) => r.x)), x1 = Math.max(...rects.map((r) => r.x + r.w));
+    const y0 = Math.min(...rects.map((r) => r.y)), y1 = Math.max(...rects.map((r) => r.y + r.h)), b = x1 - x0;
+    const marge = 10 * f;
+    for (let dy = 0; dy <= maxOmhoog; dy += 8 * f) {
+      let L = -Infinity, R = Infinity;
+      for (const [y, l, r] of k.vrij) {
+        const yy = y * f;
+        if (yy < y0 - dy - marge || yy > y1 - dy + marge) continue;
+        L = Math.max(L, l * f); R = Math.min(R, r * f);
+      }
+      if (L === -Infinity) return { dx: 0, dy };
+      if (R - L >= b + 2 * marge) {
+        const nieuw = Math.min(Math.max(x0, L + marge), R - marge - b);
+        return { dx: nieuw - x0, dy };
+      }
+    }
+    return { dx: 0, dy: 0 };
+  }
+
   /* ---------------- Productpagina ---------------- */
   const product = $("[data-product]");
   if (product) {
@@ -376,11 +401,13 @@
       try {
         const c = await catalogus(), p = c.producten.find((x) => x.s === product.dataset.product), k = p && c.kamers[p.a];
         if (!k) return;
-        const [achter, poster] = await Promise.all([laadBeeld(`${IMG}kamers-leeg/${p.a}-1264.webp`), laadBeeld(`${IMG}poster/${p.s}-960.webp`)]);
+        const [achter, poster, voor] = await Promise.all([laadBeeld(`${IMG}kamers-leeg/${p.a}-1264.webp`), laadBeeld(`${IMG}poster/${p.s}-960.webp`), laadVoor(k, p.a)]);
         if (nr !== tekenNr) return;
         const f = achter.width / 1264, pxcm = k.pxcm * f, d = 1.4 * pxcm;
         const [b, h] = m.split("x").map(Number), W = b * pxcm + 2 * d, H = h * pxcm + 2 * d;
-        const marge = achter.height * 0.07, yPoster = k.onder * f - H, X = 0;
+        // Groot formaat dat over een lamp of plant zou vallen: opzij of iets hoger, net als je thuis zou doen
+        const plek = vrijePlek(k, f, [{ x: k.cx * f - W / 2, y: k.onder * f - H, w: W, h: H }], achter.height * 0.3);
+        const marge = achter.height * 0.07, yPoster = k.onder * f - H - plek.dy, X = plek.dx;
         const E = Math.max(0, Math.ceil(marge - yPoster));
         doek ??= Object.assign(document.createElement("canvas"), { className: "galerij__doek" });
         doek.width = achter.width; doek.height = achter.height + E;  // de css snijdt bij een hogere foto vooral de vloer weg
@@ -391,6 +418,7 @@
         }
         ctx.drawImage(achter, 0, y0, achter.width, achter.height - y0, 0, E + y0, achter.width, achter.height - y0);
         tekenLijst(ctx, poster, X + k.cx * f - W / 2, E + yPoster, W, H, LIJSTKLEUR[p.j] || LIJSTKLEUR.zwart, d);
+        if (voor) ctx.drawImage(voor, 0, y0, achter.width, achter.height - y0, 0, E + y0, achter.width, achter.height - y0);
         if (!doek.isConnected) { foto0.hidden = true; foto0.after(doek); }
         if (onderschrift) onderschrift.textContent = `Op ware grootte ${onderschrift.dataset.waar || ""}, formaat ${m.replace("x", " × ")} cm`;
         $$("[data-duim]")[0]?.click();
@@ -617,7 +645,7 @@
     };
     const canvas = $("[data-canvas]"), ctx = canvas.getContext("2d");
     const laad = laadBeeld;
-    let c, per, achter, pxcm = 3, anker = { x: 0, y: 0 }, plafond = 0, verschuif = 0, sleep = null, gepland = false;
+    let c, per, achter, voor = null, pxcm = 3, anker = { x: 0, y: 0 }, plafond = 0, verschuif = 0, sleep = null, gepland = false;
 
     const vakken = () => INDELINGEN[st.indeling].maten.map((m) => ({ m }));
     const maatVan = (i) => {
@@ -637,9 +665,10 @@
         pxcm = achter.width / st.eigen.breedte;
         anker = { x: achter.width / 2, y: achter.height * 0.5 };
         plafond = 0;
+        voor = null;
       } else {
         const k = c.kamers[st.kamer] || c.kamers.woonkamer;
-        achter = await laad(`${IMG}kamers-leeg/${st.kamer}-1264.webp`);
+        [achter, voor] = await Promise.all([laad(`${IMG}kamers-leeg/${st.kamer}-1264.webp`), laadVoor(k, st.kamer)]);
         const f = achter.width / 1264;
         pxcm = k.pxcm * f;
         anker = { x: k.cx * f, y: k.onder * f };
@@ -664,6 +693,11 @@
     }
     function indeel() {
       st.pos = schikking(INDELINGEN[st.indeling], maatVan).map((q) => ({ x: anker.x + q.x * pxcm, y: anker.y - (q.y + q.h) * pxcm, w: q.b * pxcm, h: q.h * pxcm }));
+      // Standaardopstelling op vrije muur: niet achter de plant of lamp beginnen (zelf slepen kan altijd)
+      if (!st.eigen) {
+        const plek = vrijePlek(c.kamers[st.kamer], achter.width / 1264, st.pos, achter.height * 0.3);
+        st.pos.forEach((q) => { q.x += plek.dx; q.y -= plek.dy; });
+      }
       // Past de groep niet op de foto? Dan verlengen we de muur naar boven (zonder plafond of sierlijst),
       // zodat de posters boven het meubel blijven hangen en helemaal in beeld zijn.
       const boven = Math.min(...st.pos.map((q) => q.y)), marge = achter.height * 0.04;
@@ -686,6 +720,10 @@
         ctx.drawImage(achter, 0, 0, canvas.width, achter.height);
       }
       ims.forEach((im, i) => { if (im) { const p = st.pos[i]; omlijst(im, p.x, p.y, p.w, p.h, kleurVan(i)); } });
+      if (voor) { // planten, lampen en meubels voor de posters: poster verdwijnt er netjes achter
+        const y0 = verschuif ? Math.round(plafond) : 0, boven = verschuif ? verschuif + y0 : 0;
+        ctx.drawImage(voor, 0, y0, achter.width, achter.height - y0, 0, boven, achter.width, achter.height - y0);
+      }
       if (!voorDownload && sleep) {
         const p = st.pos[sleep.i];
         ctx.save(); ctx.setLineDash([10, 8]); ctx.lineWidth = Math.max(2, canvas.width / 500); ctx.strokeStyle = "#fff";
