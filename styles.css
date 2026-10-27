@@ -484,7 +484,7 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .vakken { display: grid; gap: 8px; }
 .vak { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--wit); border: 1px solid var(--lijn); border-radius: 12px; padding: 8px 12px 8px 8px; }
 .vak__beeld { width: 48px; height: 64px; padding: 0; border: 0; background: var(--papier-2); display: grid; place-items: center; font-size: 1.4rem; }
-.vak__beeld img { width: 100%; height: 100%; object-fit: cover; border: 3px solid #18161d; }
+.vak__beeld img { width: 100%; height: 100%; object-fit: cover; border: 2px solid #18161d; }
 .vak__info { display: grid; gap: 4px; }
 .vak__info b { font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vak__info select { border: 1.5px solid var(--lijn); border-radius: 8px; padding: 5px 8px; font-size: .82rem; background: var(--wit); max-width: 100%; }
@@ -507,12 +507,12 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .kiezer__raster button { border: 0; background: none; padding: 0; text-align: left; }
 
 /* ---------- Lijsten: elke poster hangt in een lijst, ook al verkopen we die (nog) niet ---------- */
-.lijst--zwart, .lijst--eiken, .lijst--wit { border-style: solid; border-width: clamp(4px, .7vw, 9px); box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 4px 8px -2px rgba(0, 0, 0, .25), 0 22px 30px -14px rgba(0, 0, 0, .6) !important; }
+.lijst--zwart, .lijst--eiken, .lijst--wit { border-style: solid; border-width: clamp(3px, .4vw, 5px); box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 4px 8px -2px rgba(0, 0, 0, .25), 0 22px 30px -14px rgba(0, 0, 0, .6) !important; }
 .lijst--zwart { border-color: #34303d #1d1a24 #0e0d13 #26232e; }
 .lijst--eiken { border-color: #d4a676 #b88a5a #94693f #c39360; }
 .lijst--wit { border-color: #ffffff #f1ede4 #d6d0c3 #f7f4ed; }
-.mini__beeld .lijst--zwart, .mini__beeld .lijst--eiken, .mini__beeld .lijst--wit, .planner-mini .lijst--zwart, .planner-mini .lijst--eiken { border-width: 4px; }
-.galerij__poster .lijst--zwart, .galerij__poster .lijst--eiken, .galerij__poster .lijst--wit { border-width: clamp(8px, 1.2vw, 14px); }
+.mini__beeld .lijst--zwart, .mini__beeld .lijst--eiken, .mini__beeld .lijst--wit, .planner-mini .lijst--zwart, .planner-mini .lijst--eiken { border-width: 3px; }
+.galerij__poster .lijst--zwart, .galerij__poster .lijst--eiken, .galerij__poster .lijst--wit { border-width: clamp(5px, .7vw, 9px); }
 
 /* ---------- Afrekenen ---------- */
 .afrekenen { display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: start; }
@@ -779,7 +779,7 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .formaat--top { outline: 3px solid var(--blush); }
 .formaat__lint { position: absolute; top: 12px; right: -34px; z-index: 2; transform: rotate(35deg); background: var(--tomaat); color: #fff; font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 4px 40px; box-shadow: 0 4px 10px -4px rgba(0, 0, 0, .4); }
 .formaat__schaal { height: 190px; display: flex; align-items: flex-end; justify-content: center; padding: 18px 10px 20px; background: linear-gradient(180deg, color-mix(in srgb, var(--blush) 22%, var(--papier)) 0 78%, color-mix(in srgb, var(--inkt) 12%, var(--papier-2)) 78%); }
-.formaat__poster { display: block; box-sizing: border-box; border-width: 4px !important; overflow: hidden; background: var(--papier-2); flex-shrink: 0; }
+.formaat__poster { display: block; box-sizing: border-box; border-width: 3px !important; overflow: hidden; background: var(--papier-2); flex-shrink: 0; }
 .formaat__poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .formaat__info { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .formaat__info h3 { font-size: 1.45rem; margin: 0; letter-spacing: -.02em; }
@@ -925,13 +925,15 @@ html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
   var(--museum-2); color: #F3E6CC; }
 .cat-twist .lijstkop--scene + .sectie--krap .filter { background: #F3E6CC; }
 .cat-twist .kaart__beeld { background: radial-gradient(ellipse 60% 45% at 50% 0%, rgba(255, 238, 200, .28), transparent 70%), transparent !important; box-shadow: none; outline-color: color-mix(in srgb, var(--goud) 35%, transparent); }
-.cat-twist .kaart__poster { border-style: solid; border-width: 10px !important; border-color: #E2C27A #B48A3E #8C6A2C #CFA75A !important; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25), 0 2px 3px rgba(0, 0, 0, .4), 0 26px 40px -14px rgba(0, 0, 0, .8) !important; }
+.cat-twist .kaart__poster { border-style: solid; border-width: 5px !important; border-color: #E2C27A #B48A3E #8C6A2C #CFA75A !important; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25), 0 2px 3px rgba(0, 0, 0, .4), 0 26px 40px -14px rgba(0, 0, 0, .8) !important; }
 .cat-twist .kaart__tekst { margin: 8px auto 0; background: #F3E6CC; color: #2A0B11; border-radius: 4px; padding: 8px 10px 10px; text-align: center; box-shadow: 0 6px 14px -8px rgba(0, 0, 0, .7); max-width: 84%; }
 .cat-twist .kaart__tekst h3 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: .95rem; }
 .cat-twist .kaart__tekst h3 a { color: #2A0B11; }
 .cat-twist .kaart__tekst p { background: none; color: #7a4e1d; padding: 0; font-style: italic; font-family: "Fraunces", Georgia, serif; }
-.cat-twist .leeg, .cat-twist .promo { color: inherit; }
-.cat-twist .speels svg path, .cat-twist .speels svg rect { stroke: var(--blush); }
+.cat-twist .leeg { color: inherit; }
+.cat-twist .promo--zon { color: var(--inkt); }  /* tekst op geel blijft donker */
+.cat-twist .speels svg:not(.speels__pim) path, .cat-twist .speels svg:not(.speels__pim) rect { stroke: var(--blush); }
+.cat-twist .speels--hanger { color: #F3E6CC; }
 
 .cat-twist .filter { color: var(--inkt); }
 /* Op mobiel geen glas-effect op de kopbalk: dat maakt het uitklapmenu anders maar zo hoog als de balk */
@@ -976,3 +978,93 @@ html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
 .review__poster img { width: 34px; height: auto; flex: 0 0 34px; }
 .review__poster:hover span { text-decoration: underline; }
 @media (max-width: 700px) { .reviews__rij { grid-auto-columns: 82%; } }
+
+/* ---------- Feedback oktober 2026: logo, homepage, mobiel ---------- */
+/* Logo = Pim, maar stil: een logo dat beweegt leidt af */
+.merk--pim .pim__lijf, .merk--pim .pim__zwaai, .merk--pim .pim__oog { animation: none !important; }
+.logo .merk--pim { width: 36px; height: 43px; margin-top: -4px; }
+.voet .logo .merk--pim { width: 40px; height: 48px; }
+@media (max-width: 900px) { .logo .merk--pim { width: 30px; height: 36px; } }
+
+/* 2+1-sticker: twee regels als blokken, optisch in het midden (cursief leunt naar rechts) */
+.held__sticker { padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .08em; }
+.held__sticker span { display: block; line-height: .95; }
+.held__sticker span:first-child { font-size: 1.12em; transform: translateX(-.04em); }
+
+/* Merkblok: sfeerfoto in plaats van het grote logo */
+.merkblok__beeld--foto { background: none !important; border-radius: 28px !important; aspect-ratio: 4 / 5; overflow: hidden; display: block; box-shadow: 0 30px 60px -30px rgba(14, 59, 47, .45); }
+.merkblok__beeld--foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 900px) { .merkblok__beeld--foto { max-width: none; aspect-ratio: 3 / 2; } }
+
+/* Homepage: Klassiek met een twist */
+.twistblok { --museum: #3B1018; --museum-2: #2A0B11; --goud: #C9A45C; --perkament: #F3E6CC; position: relative; overflow: hidden; color: var(--perkament);
+  background: radial-gradient(circle at 25% 25%, rgba(201, 164, 92, .07) 0 6px, transparent 7px) 0 0 / 46px 46px,
+              radial-gradient(circle at 75% 75%, rgba(201, 164, 92, .07) 0 6px, transparent 7px) 0 0 / 46px 46px, var(--museum);
+  padding: clamp(64px, 8vw, 112px) 0; }
+.twistblok::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 45% 70% at 72% 0%, rgba(255, 228, 170, .16), transparent 70%); pointer-events: none; }
+.twistblok__in { position: relative; display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(36px, 6vw, 96px); align-items: center; }
+.twistblok__label { font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--goud); margin: 0 0 18px; }
+.twistblok h2 { font-family: "Fraunces", Georgia, serif; font-weight: 500; font-size: clamp(2.8rem, 5.6vw, 4.8rem); line-height: 1; letter-spacing: -.01em; margin: 0 0 26px; color: var(--perkament); }
+.twistblok h2 .twist__spray { font-size: .6em; transform: rotate(-5deg) translate(.5em, -.1em); }
+.twistblok__tekst p:not(.twistblok__label) { color: color-mix(in srgb, var(--perkament) 82%, transparent); font-size: 1.08rem; line-height: 1.65; max-width: 46ch; margin: 0 0 30px; }
+.knop--goud { background: var(--goud); color: var(--museum-2); box-shadow: 0 6px 0 -2px #8C6A2C; }
+.knop--goud:hover { background: #D8B672; transform: translateY(-2px); }
+.knop--goud svg { stroke: currentColor; }
+.twistblok__zaal { position: relative; display: grid; place-items: center; min-height: clamp(380px, 40vw, 560px); }
+.twistblok__zaal img { display: block; width: 100%; height: auto; border-style: solid; border-width: 5px; border-color: #E2C27A #B48A3E #8C6A2C #CFA75A;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25), 0 2px 3px rgba(0, 0, 0, .4), 0 34px 50px -18px rgba(0, 0, 0, .85); }
+.twistblok__hoofd { position: relative; z-index: 2; width: min(58%, 330px); text-decoration: none; transition: transform .4s cubic-bezier(.3, 1.4, .5, 1); }
+.twistblok__hoofd:hover { transform: translateY(-6px); }
+.twistblok__bordje { display: grid; gap: 2px; margin: 18px auto 0; width: max-content; max-width: 100%; background: var(--perkament); color: var(--museum-2); border-radius: 3px; padding: 8px 16px 9px; text-align: center; box-shadow: 0 8px 18px -10px rgba(0, 0, 0, .8); }
+.twistblok__bordje b { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: .98rem; }
+.twistblok__bordje i { font-family: "Fraunces", Georgia, serif; font-size: .82rem; color: #7a4e1d; }
+.twistblok__lijst { position: absolute; z-index: 1; width: min(30%, 170px); opacity: .92; transition: transform .4s cubic-bezier(.3, 1.4, .5, 1), opacity .3s; }
+.twistblok__lijst:hover { opacity: 1; transform: translateY(-4px); }
+.twistblok__lijst--0 { left: 2%; top: 8%; transform: rotate(-4deg); }
+.twistblok__lijst--1 { right: 2%; bottom: 14%; transform: rotate(3deg); }
+.twistblok__lijst--0:hover { transform: rotate(-4deg) translateY(-4px); }
+.twistblok__lijst--1:hover { transform: rotate(3deg) translateY(-4px); }
+@media (max-width: 900px) {
+  .twistblok__in { grid-template-columns: 1fr; }
+  .twistblok__zaal { min-height: 0; padding: 10px 0 0; }
+  .twistblok__hoofd { width: 62%; }
+  .twistblok__lijst { width: 27%; }
+  .twistblok__lijst--0 { left: 0; top: 6%; }
+  .twistblok__lijst--1 { right: 0; bottom: 22%; }
+}
+
+/* "Zo hangt hij thuis": geen gat in de laatste rij */
+.mozaiek--6 .mozaiek__tegel:nth-child(5), .mozaiek--6 .mozaiek__tegel:nth-child(6) { grid-column: span 2; }
+
+/* Golvend lijntje onder de titel: nooit afsnijden */
+.krul { overflow: visible; }
+.lijstkop--scene .krul { height: 18px; margin: -4px 0 18px; padding: 2px 0; box-sizing: content-box; }
+
+@media (max-width: 700px) {
+  /* Ruimtetegels: klein label, zodat de poster aan de muur zichtbaar blijft */
+  .ruimtes .ruimte__label { left: 8px; bottom: 8px; padding: 4px 10px 5px; border-radius: 999px; gap: 0; }
+  .ruimtes .ruimte__label b { font-size: .9rem; }
+  .ruimtes .ruimte__label small { font-size: .68rem; }
+  /* Themapagina's en homepage: prijsvlak onder de foto in plaats van erop */
+  .mozaiek .mozaiek__tegel { display: flex; flex-direction: column; aspect-ratio: auto; height: auto; }
+  .mozaiek .mozaiek__tegel img { aspect-ratio: 3 / 2; height: auto; flex: none; }
+  .mozaiek .mozaiek__label { position: static; transform: none; opacity: 1; border-radius: 0; box-shadow: none; padding: 7px 10px 9px; background: var(--wit); }
+  .mozaiek .mozaiek__label b { font-size: .82rem; line-height: 1.2; }
+  .mozaiek .mozaiek__label small { font-size: .74rem; }
+  .mozaiek--6 { grid-auto-rows: auto; }
+  .mozaiek--6 .mozaiek__tegel:nth-child(1) { grid-row: span 1; }
+  .mozaiek--6 .mozaiek__tegel:nth-child(5) { grid-column: span 1; }
+  .mozaiek--6 .mozaiek__tegel:nth-child(6) { grid-column: span 2; }
+  .sectie--donker .mozaiek__tegel { border-width: 4px; }
+}
+.mand__land { font-size: .78em; color: var(--inkt-2); font-weight: 500; margin-left: 4px; }
+.adres { font-style: normal; background: var(--wit); border: 1px solid var(--lijn); border-radius: 14px; padding: 16px 20px; display: inline-block; line-height: 1.6; }
+mark.invullen { background: #FFE08A; color: var(--inkt); padding: 0 4px; border-radius: 4px; }
+.twistblok__bordje b, .twistblok__bordje i { white-space: nowrap; }
+.twistblok h2 .twist__klassiek { margin-bottom: -.12em; }
+/* Pim als zijversiering: stil, zoals het logo (beweging in je ooghoek leidt af) */
+.speels--hanger { color: var(--inkt); width: 76px; transform: rotate(-6deg); }
+.speels__pim .pim__lijf, .speels__pim .pim__zwaai, .speels__pim .pim__oog { animation: none !important; }
+/* Uitsnede op de poster aan de muur (die hangt in het bovenste derde van elke kamerfoto) */
+.mozaiek__tegel img { object-position: 50% 30%; }
+.mozaiek--6 .mozaiek__tegel:nth-child(n+4) img { object-position: 50% 0%; }

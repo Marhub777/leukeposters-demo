@@ -95,13 +95,13 @@
       : `<div class="mand__voortgang">Je verzending is <b>gratis</b><div class="mand__balk"><span style="width:100%"></span></div></div>`;
     const rest = b.aantal % 3;
     const tip = rest === 2 ? `<p class="mand__tip"><b>Nog 1 poster</b> en de goedkoopste is gratis. <a class="link" href="${pad("/populaire-posters/")}">Kies er nog één</a></p>`
-      : rest === 1 && b.aantal > 1 ? `<p class="mand__tip">Nog 2 posters en je krijgt er weer één gratis.</p>` : "";
+      : rest === 1 ? `<p class="mand__tip"><b>2+1 gratis:</b> voeg er nog 2 toe, de goedkoopste is gratis. <a class="link" href="${pad("/populaire-posters/")}">Bekijk populaire posters</a></p>` : "";
     return `${voortgang}${regels}${tip}<div class="mand__totaal">
       <div><span>Subtotaal (${b.aantal} ${b.aantal === 1 ? "poster" : "posters"})</span><span>${euro(b.subtotaal)}</span></div>
       ${b.korting ? `<div class="korting"><span>2+1 gratis</span><span>−${euro(b.korting)}</span></div>` : ""}
-      <div><span>Verzending</span><span>${b.verzending ? euro(b.verzending) : "Gratis"}</span></div>
+      <div><span>Verzending <small class="mand__land">NL en BE</small></span><span>${b.verzending ? euro(b.verzending) : "Gratis"}</span></div>
       <div class="eind"><span>Totaal</span><span>${euro(b.totaal)}</span></div>
-      ${compact ? "" : `<a class="knop knop--tomaat knop--breed" href="${pad("/afrekenen/")}">Afrekenen ${icoon("pijl")}</a><p class="klein" style="text-align:center;margin:6px 0 0">Inclusief btw. In huis binnen 3 tot 4 werkdagen.</p>`}</div>`;
+      ${compact ? "" : `<a class="knop knop--tomaat knop--breed" href="${pad("/afrekenen/")}">Afrekenen ${icoon("pijl")}</a><p class="klein" style="text-align:center;margin:6px 0 0">Inclusief btw. Gratis verzending vanaf €${GRATIS_VANAF}, daaronder ${euro(VERZENDKOSTEN)}. We leveren in Nederland en België, binnen 3 tot 4 werkdagen.</p>`}</div>`;
   }
 
   function tekenMand() {
@@ -378,7 +378,7 @@
         if (!k) return;
         const [achter, poster] = await Promise.all([laadBeeld(`${IMG}kamers-leeg/${p.a}-1264.webp`), laadBeeld(`${IMG}poster/${p.s}-960.webp`)]);
         if (nr !== tekenNr) return;
-        const f = achter.width / 1264, pxcm = k.pxcm * f, d = 2.2 * pxcm;
+        const f = achter.width / 1264, pxcm = k.pxcm * f, d = 1.4 * pxcm;
         const [b, h] = m.split("x").map(Number), W = b * pxcm + 2 * d, H = h * pxcm + 2 * d;
         const marge = achter.height * 0.07, yPoster = k.onder * f - H, X = 0;
         const E = Math.max(0, Math.ceil(marge - yPoster));
@@ -551,7 +551,13 @@
   }
   const ballon = $("[data-hulp-ballon]");
   if (ballon && !lees("lp_ballon", false) && !document.body.classList.contains("plannerpagina")) {
-    setTimeout(() => { if (hulpPaneel.hidden) ballon.hidden = false; }, 5000);
+    // 1 keer per bezoeker, en na 8 seconden vanzelf weg: hij mag nooit blijven hangen over de posters
+    setTimeout(() => {
+      if (!hulpPaneel.hidden) return;
+      ballon.hidden = false;
+      bewaar("lp_ballon", true);
+      setTimeout(() => { ballon.hidden = true; }, 8000);
+    }, 5000);
   }
   const ballonWeg = () => { if (ballon) ballon.hidden = true; bewaar("lp_ballon", true); };
   ballon?.addEventListener("click", (e) => { ballonWeg(); if (!e.target.closest("[data-hulp-ballon-weg]")) zetHulp(true); });
@@ -598,7 +604,7 @@
     };
     const TUSSEN = 8; // cm tussen de lijsten
     const LIJSTEN = { auto: ["Automatisch", null], zwart: ["Zwart", "#18161d"], eiken: ["Eiken", "#b88a5a"], wit: ["Wit", "#f4f1ea"] };
-    const LIJST_CM = 2.2;
+    const LIJST_CM = 1.4;
     const params = new URLSearchParams(location.search);
     const st = {
       kamer: params.get("k") || "woonkamer",
@@ -831,13 +837,25 @@
       : "Dit is de conceptversie van de nieuwe site. Betalen via Mollie en het automatisch doorzetten naar de drukker worden in de volgende stap gekoppeld. Er is niets besteld.";
   });
 
-  // Videoloop in de kop: stil bij "minder beweging", en pauzeren als hij uit beeld is (scheelt batterij)
+  // Videoloop in de kop: alleen op grotere schermen en niet bij databesparing of "minder beweging". Telefoons houden de
+  // foto, dat scheelt bijna 1 MB. Pauzeren als hij uit beeld is (scheelt batterij).
   const heldVideo = $("[data-held-video]");
-  if (heldVideo) {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { heldVideo.removeAttribute("autoplay"); heldVideo.pause(); }
-    else if ("IntersectionObserver" in window) {
+  const zuinig = navigator.connection && (navigator.connection.saveData || /2g/.test(navigator.connection.effectiveType || ""));
+  if (heldVideo && heldVideo.dataset.src && !zuinig && matchMedia("(min-width: 700px)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    heldVideo.src = heldVideo.dataset.src.startsWith("/") ? pad(heldVideo.dataset.src) : heldVideo.dataset.src;
+    heldVideo.preload = "auto";
+    if ("IntersectionObserver" in window) {
       new IntersectionObserver(([e]) => { e.isIntersecting ? heldVideo.play().catch(() => {}) : heldVideo.pause(); }).observe(heldVideo);
-    }
+    } else heldVideo.play().catch(() => {});
+  }
+
+  // Hoverbeeld op posterkaarten: pas laden als je er met een muis overheen gaat (telefoons laden het nooit)
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    document.addEventListener("pointerover", (ev) => {
+      const kaart = ev.target.closest && ev.target.closest(".kaart");
+      const img = kaart && kaart.querySelector("img.kaart__sfeer[data-src]");
+      if (img) { img.src = img.dataset.src.startsWith("/") ? pad(img.dataset.src) : img.dataset.src; img.removeAttribute("data-src"); }
+    }, { passive: true });
   }
 
   // Nieuwsbrief: zonder ingestelde dienst (NIEUWSBRIEF_ACTIE in inhoud.py) alleen een bevestiging tonen
