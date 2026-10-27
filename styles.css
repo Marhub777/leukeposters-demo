@@ -843,7 +843,7 @@ html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
 @media (hover: hover) { .kaart:hover .kaart__beeld { outline-color: var(--tomaat); outline-width: 2px; } }
 
 /* ---------- Doorkijk: groepsfoto door een boog ---------- */
-.doorkijk { padding: clamp(56px, 8vw, 100px) 0; background: linear-gradient(180deg, var(--papier) 0 55%, var(--papier-2) 55%); }
+.doorkijk { padding: clamp(48px, 7vw, 96px) 0; background: linear-gradient(180deg, var(--papier) 0 55%, var(--papier-2) 55%); }
 .doorkijk__in { display: grid; grid-template-columns: 1.25fr .75fr; gap: clamp(28px, 5vw, 64px); align-items: center; }
 .doorkijk__boog { margin: 0; position: relative; border-radius: 999px 999px 26px 26px; overflow: hidden; aspect-ratio: 4 / 3.4; border: 12px solid var(--inkt); box-shadow: 0 0 0 6px var(--blush), 0 40px 70px -30px rgba(14, 59, 47, .6); }
 .doorkijk__boog img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; transform: scale(1.04); transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); }
@@ -1000,7 +1000,7 @@ html[data-thema] .held__sticker { background: var(--thema); color: #fff; }
 .twistblok { --museum: #3B1018; --museum-2: #2A0B11; --goud: #C9A45C; --perkament: #F3E6CC; position: relative; overflow: hidden; color: var(--perkament);
   background: radial-gradient(circle at 25% 25%, rgba(201, 164, 92, .07) 0 6px, transparent 7px) 0 0 / 46px 46px,
               radial-gradient(circle at 75% 75%, rgba(201, 164, 92, .07) 0 6px, transparent 7px) 0 0 / 46px 46px, var(--museum);
-  padding: clamp(64px, 8vw, 112px) 0; }
+  padding: clamp(48px, 7vw, 96px) 0; }
 .twistblok::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 45% 70% at 72% 0%, rgba(255, 228, 170, .16), transparent 70%); pointer-events: none; }
 .twistblok__in { position: relative; display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(36px, 6vw, 96px); align-items: center; }
 .twistblok__label { font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--goud); margin: 0 0 18px; }
@@ -1068,3 +1068,27 @@ mark.invullen { background: #FFE08A; color: var(--inkt); padding: 0 4px; border-
 /* Uitsnede op de poster aan de muur (die hangt in het bovenste derde van elke kamerfoto) */
 .mozaiek__tegel img { object-position: 50% 30%; }
 .mozaiek--6 .mozaiek__tegel:nth-child(n+4) img { object-position: 50% 0%; }
+/* Tekstballonnen bij "Zo hangt hij thuis": klein en compact, zodat de foto het werk doet */
+.mozaiek__label { left: 10px; bottom: 10px; padding: 5px 10px 6px; border-radius: 10px; gap: 0; max-width: calc(100% - 20px); line-height: 1.2;
+  background: color-mix(in srgb, var(--wit) 92%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 4px 14px -6px rgba(14, 59, 47, .35); transform: none; }
+.mozaiek__label b { font-size: .78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mozaiek__label small { font-size: .7rem; }
+.mozaiek__tegel:hover .mozaiek__label { transform: translateY(-2px); }
+/* Consistentie: een vast systeem voor afrondingen (kaarten en beelden --r, grote beeldblokken --r-groot) */
+.promo, .mozaiek__tegel, .faqkaart, .merkblok__beeld--foto { border-radius: var(--r-groot, 28px) !important; }
+.promo, .mozaiek__tegel { border-radius: var(--r, 24px) !important; }
+/* Winkelwagen en afrekenen: Pim uit beeld, niets over het totaal en de afrekenknop */
+.kassa .hulp { display: none; }
+/* Mobiel menu: de drie snelle links naast elkaar, Posters met stijlen en ruimtes eronder */
+@media (max-width: 900px) {
+  .nav__lijst { grid-template-columns: repeat(3, 1fr); }
+  .nav__item:not(.nav__item--uitklap) > a { font-size: 1rem; padding: 14px 8px; text-align: center; }
+}
+/* Gidsen op mobiel: eerst kop en tekst, dan de foto (nooit twee foto's direct onder elkaar) */
+@media (max-width: 700px) {
+  .gidsstap { grid-template-columns: 1fr; gap: 16px; }
+  .gidsstap figure, .gidsstap:nth-child(even) figure { order: 2; }
+  .gidsstap__tekst { order: 1; }
+}
+/* Kassa: rust. Geen nieuwsbriefblok tussen winkelwagen en afrekenen */
+.kassa .nieuwsbrief { display: none; }
