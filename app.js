@@ -863,16 +863,62 @@
     });
   }
 
-  /* ---------------- Afrekenen (concept) ---------------- */
+  /* ---------------- Afrekenen (Mollie) ---------------- */
+  // De server (functions/api/afrekenen.js) rekent de prijs zelf opnieuw uit; we sturen alleen poster, maat en aantal mee.
   const afrekenen = $("[data-afrekenen]");
-  afrekenen?.addEventListener("submit", (ev) => {
+  afrekenen?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     let ok = true;
     $$("input[required]", afrekenen).forEach((i) => { const goed = i.value.trim() && i.checkValidity(); i.setAttribute("aria-invalid", !goed); ok = ok && goed; });
     const melding = $("[data-afrekenen-melding]");
-    melding.hidden = false;
-    melding.textContent = !mand.length ? "Je winkelwagen is leeg." : !ok ? "Vul de rood gemarkeerde velden in."
-      : "Dit is de conceptversie van de nieuwe site. Betalen via Mollie en het automatisch doorzetten naar de drukker worden in de volgende stap gekoppeld. Er is niets besteld.";
+    const meld = (t) => { melding.hidden = false; melding.textContent = t; };
+    if (!mand.length) return meld("Je winkelwagen is leeg.");
+    if (!ok) return meld("Vul de rood gemarkeerde velden in.");
+    if (BASE) return meld("Dit is de demo van de nieuwe site. Betalen werkt alleen op de echte site. Er is niets besteld.");
+    const knop = $("button[type=submit]", afrekenen), data = new FormData(afrekenen);
+    knop.disabled = true; melding.hidden = true;
+    try {
+      const r = await fetch("/api/afrekenen", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+        klant: Object.fromEntries(["email", "voornaam", "achternaam", "postcode", "huisnummer", "straat", "plaats", "land"].map((k) => [k, data.get(k) || ""])),
+        regels: mand.map((r) => ({ s: r.s, m: r.m, a: r.a })), betaal: data.get("betaal") }) });
+      const antwoord = await r.json().catch(() => ({}));
+      if (r.ok && antwoord.url) { location.href = antwoord.url; return; }
+      meld(antwoord.fout || "Betalen lukt even niet. Probeer het over een paar minuten opnieuw, of mail ons.");
+    } catch {
+      meld("Geen verbinding. Check je internet en probeer het opnieuw.");
+    }
+    knop.disabled = false;
+  });
+
+  // Bedanktpagina: Mollie stuurt de klant terug met ?order=. Status ophalen; bij "open" (bankapp nog bezig) even opnieuw proberen.
+  const bedankt = $("[data-bedankt]");
+  if (bedankt) {
+    const order = new URLSearchParams(location.search).get("order");
+    const toon = (titel, tekst) => { bedankt.innerHTML = `<h1>${titel}</h1>${tekst}`; };
+    let pogingen = 0;
+    const kijk = async () => {
+      const o = order && await fetch(`/api/status?order=${encodeURIComponent(order)}`).then((r) => r.ok ? r.json() : null).catch(() => null);
+      if (!o) return toon("Bestelling niet gevonden", `<p class="lead">Heb je net betaald? Check je mail, of mail ons via <a class="link" href="mailto:info@leukeposters.nl">info@leukeposters.nl</a> met je naam.</p>`);
+      if (o.status === "paid" || o.status === "authorized") {
+        mand = []; bewaarMand();
+        return toon(`Bedankt, ${esc(o.voornaam)}!`, `<p class="lead">Je bestelling <b>${esc(o.id)}</b> is betaald. We drukken je ${o.aantal === 1 ? "poster" : o.aantal + " posters"} op bestelling en ze zijn binnen 3 tot 4 werkdagen bij je.</p>
+          <p>De bevestiging gaat naar <b>${esc(o.email)}</b>. Zodra je pakket onderweg is, krijg je de track-and-trace.</p>
+          <ul class="vinkjes">${o.regels.map((r) => `<li>${r.aantal}× ${esc(r.naam)}, ${r.maat.replace("x", " × ")} cm${r.gratis ? ` (${r.gratis}× gratis)` : ""}</li>`).join("")}</ul>
+          <p><a class="knop knop--tomaat" href="/alle-posters/">Verder kijken</a></p>`);
+      }
+      if ((o.status === "open" || o.status === "pending") && pogingen++ < 10) return setTimeout(kijk, 2000);
+      if (o.status === "open" || o.status === "pending") return toon("We wachten nog op je bank", `<p class="lead">Je betaling is nog niet bevestigd. Dat kan even duren. Je krijgt een mail zodra hij binnen is.</p><p><a class="link" href="">Opnieuw kijken</a></p>`);
+      toon("Betaling niet gelukt", `<p class="lead">De betaling is ${o.status === "canceled" ? "geannuleerd" : o.status === "expired" ? "verlopen" : "niet gelukt"}. Er is niets afgeschreven en je winkelwagen staat er nog.</p><p><a class="knop knop--tomaat" href="/afrekenen/">Opnieuw proberen</a></p>`);
+    };
+    kijk();
+  }
+
+  // Herroepingsformulier: maakt een kant-en-klare mail, er gaat niets via de server
+  $("[data-herroeping]")?.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const d = new FormData(ev.target), datum = (v) => v ? new Date(v).toLocaleDateString("nl-NL") : "...";
+    const tekst = `Ik deel u hierbij mee dat ik onze overeenkomst betreffende de verkoop van de volgende producten herroep:\n\nOrdernummer: ${d.get("order")}\nPoster(s): ${d.get("posters")}\nBesteld op: ${datum(d.get("besteld"))}\nOntvangen op: ${datum(d.get("ontvangen"))}\nNaam: ${d.get("naam")}\nAdres: ${d.get("adres")}\nDatum: ${new Date().toLocaleDateString("nl-NL")}`;
+    location.href = `mailto:info@leukeposters.nl?subject=${encodeURIComponent("Herroeping bestelling " + d.get("order"))}&body=${encodeURIComponent(tekst)}`;
   });
 
   // Videoloop in de kop: alleen op grotere schermen en niet bij databesparing of "minder beweging". Telefoons houden de

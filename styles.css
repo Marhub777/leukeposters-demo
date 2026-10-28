@@ -415,9 +415,9 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .zoekveld--groot input { font-size: 1.15rem; padding: 14px 0; }
 .zoeklaag__resultaat { margin-top: 18px; }
 .zoeklaag__resultaat .raster { grid-template-columns: repeat(6, 1fr); gap: 18px 14px; }
-.mini { text-decoration: none; display: grid; gap: 6px; font-size: .88rem; font-weight: 600; }
-.mini__beeld { aspect-ratio: 4 / 5; background: var(--tint); border-radius: 10px; display: grid; place-items: center; padding: 14%; }
-.mini__beeld img { max-height: 100%; width: auto; box-shadow: 0 8px 14px -8px rgba(30, 27, 46, .5); }
+.mini { text-decoration: none; display: grid; gap: 6px; font-size: .88rem; font-weight: 600; min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
+.mini__beeld { aspect-ratio: 4 / 5; background: var(--tint); border-radius: 10px; display: grid; place-items: center; padding: 14%; min-width: 0; overflow: hidden; }
+.mini__beeld img { max-height: 100%; max-width: 100%; width: auto; height: auto; box-shadow: 0 8px 14px -8px rgba(30, 27, 46, .5); }
 .zoeklaag__tips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ---------- Posterhulp (chat) ---------- */
@@ -443,7 +443,7 @@ svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .bericht--jij { background: var(--tomaat); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
 .keuzes { display: flex; flex-wrap: wrap; gap: 6px; }
 .keuzes .chip { font-size: .85rem; }
-.hulp__tips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.hulp__tips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
 .hulp__tips .mini { font-size: .75rem; }
 .hulp__invoer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--lijn); background: var(--wit); }
 .hulp__invoer input { flex: 1; border: 1.5px solid var(--lijn); border-radius: 999px; padding: 10px 14px; outline: none; }
@@ -1092,3 +1092,11 @@ mark.invullen { background: #FFE08A; color: var(--inkt); padding: 0 4px; border-
 }
 /* Kassa: rust. Geen nieuwsbriefblok tussen winkelwagen en afrekenen */
 .kassa .nieuwsbrief { display: none; }
+
+/* Herroepingsformulier: zelfde velden als bij afrekenen */
+.herroeping { display: grid; gap: 14px; margin: 26px 0; }
+.herroeping label { display: grid; gap: 5px; font-weight: 600; font-size: .9rem; }
+.herroeping input { border: 1.5px solid var(--lijn); border-radius: 10px; padding: 12px 14px; background: var(--wit); font-weight: 400; font: inherit; min-width: 0; }
+.herroeping input:focus { outline: none; border-color: var(--inkt); }
+.herroeping .rij { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .herroeping .rij { grid-template-columns: 1fr; } }
